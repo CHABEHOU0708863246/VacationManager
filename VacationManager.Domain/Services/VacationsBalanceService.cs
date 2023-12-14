@@ -12,16 +12,21 @@ namespace VacationManager.Domain.Services
         private readonly IVacationsRepository _vacationsRepository;
         private readonly int _initialBalance;
         private readonly IUsersRepository _usersRepository;
+        private readonly IVacationsBalanceRepository _vacationsBalanceRepository;
+        private readonly List<DateTime> _holidays;
 
 
 
-        public VacationsBalanceService(IVacationsRepository vacationsRepository, IUsersRepository usersRepository, IOptions<VacationOptions> options)
+        public VacationsBalanceService(IVacationsRepository vacationsRepository, IUsersRepository usersRepository, IOptions<VacationOptions> options, IVacationsBalanceRepository vacationsBalanceRepository, List<DateTime> holidays)
         {
             _vacationsRepository = vacationsRepository;
             _initialBalance = options.Value.InitialBalance;
             _usersRepository = usersRepository;
+            _vacationsBalanceRepository = vacationsBalanceRepository;
+            _holidays = holidays;
         }
 
+        #region Récupération des détails de congés de tous les utilisateurs
         public async Task<IEnumerable<VacationDetailsDTO>> GetAllVacationDetailsAsync(CancellationToken cancellationToken)
         {
             // Récupère la liste de tous les utilisateurs
@@ -36,7 +41,9 @@ namespace VacationManager.Domain.Services
             // Renvoie la liste complète des détails de vacances
             return vacationDetails;
         }
+        #endregion
 
+        #region Récupération des détails de congés d'un utilisateur spécifique
         public async Task<VacationDetailsDTO> GetVacationDetailsByUserIdAsync(int userId, CancellationToken cancellationToken)
         {
             var vacations = await _vacationsRepository.GetVacationsWithUsersByUserIdAsync(userId, cancellationToken);
@@ -57,7 +64,7 @@ namespace VacationManager.Domain.Services
                 };
             }
 
-            var usedVacationDays = CalculateUsedVacationDays(vacations, userId);
+            var usedVacationDays = CalculateUsedVacationDaysWithHoliday(vacations, userId);
 
             var remainingVacationDays = _initialBalance - usedVacationDays;
 
@@ -74,6 +81,7 @@ namespace VacationManager.Domain.Services
                 RemainingBalance = remainingVacationDays
             };
         }
+        #endregion
 
         #region Cette méthode récupère le solde de congés d'un utilisateur spécifique.
         public async Task<VacationsBalance> GetVacationBalanceByUserIdAsync(int userId, CancellationToken cancellationToken)
@@ -90,7 +98,7 @@ namespace VacationManager.Domain.Services
                 return null;
             }
 
-            var usedVacationDays = CalculateUsedVacationDays(vacationsWithUsers, userId);
+            var usedVacationDays = CalculateUsedVacationDaysWithHoliday(vacationsWithUsers, userId);
 
             var remainingVacationDays = _initialBalance - usedVacationDays;
 
@@ -153,11 +161,58 @@ namespace VacationManager.Domain.Services
         }
         #endregion
 
-        #region Cette méthode calcule le nombre de jours de congé utilisés.
-        private int CalculateUsedVacationDays(IEnumerable<Vacations> vacations, int userId)
+        #region Réinitialiser le solde initial de congé à chaque nouvelle année
+        public async Task ResetInitialBalanceAsync(int userId, DateTime startDate, DateTime endDate, CancellationToken cancellationToken)
+        {
+            // Vérifie que les dates de début et de fin sont valides.
+            if (startDate > endDate)
+            {
+                throw new ArgumentException("La date de début doit être inférieure ou égale à la date de fin");
+            }
+
+            // Récupère le solde de congés de l'utilisateur.
+            var vacationBalance = await _vacationsBalanceRepository.GetByUserIdAsync(userId, cancellationToken);
+
+            // Réinitialise le solde initial de congé à zéro.
+            vacationBalance.InitialVacationBalance = 0;
+
+            // Met à jour le solde de congés dans le dépôt.
+            await _vacationsBalanceRepository.UpdateAsync(userId, startDate, endDate, cancellationToken);
+        }
+
+        #endregion
+
+        #region Methode privé pour prendre en compte les jours fériés et les week-ends lors du calcul du solde de vacances
+        private int CalculateUsedVacationDaysWithHoliday(IEnumerable<Vacations> vacations, int userId)
         {
             return vacations.Where(v => v.UserId == userId)
-                            .Sum(v => (v.EndDate - v.StartDate).Days + 1);
+                           .Sum(v =>
+                           {
+                               var startDate = v.StartDate;
+                               var endDate = v.EndDate;
+                               var totalDays = 0;
+
+                               while (startDate <= endDate)
+                               {
+                                   if (startDate.DayOfWeek != DayOfWeek.Saturday &&
+                                      startDate.DayOfWeek != DayOfWeek.Sunday &&
+                                      !IsHoliday(startDate))
+                                   {
+                                       totalDays++;
+                                   }
+
+                                   startDate = startDate.AddDays(1);
+                               }
+
+                               return totalDays;
+                           });
+        }
+        #endregion
+
+        #region Implementation de la methode Holiday
+        private bool IsHoliday(DateTime date)
+        {
+            return _holidays.Contains(date);
         }
         #endregion
 

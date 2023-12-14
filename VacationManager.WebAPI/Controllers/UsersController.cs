@@ -54,7 +54,8 @@ namespace VacationManager.WebAPI.Controllers
                         DateOfBirth = u.DateOfBirth,
                         DateCreateAccount = u.DateCreateAccount,
                         DateUpdateAccount = u.DateUpdateAccount,
-                        RoleID = u.RoleID
+                        RoleID = u.RoleID,
+                        RoleName = u.Roles.Name
                     });
 
                     return Ok(userViewModels);
@@ -107,7 +108,8 @@ namespace VacationManager.WebAPI.Controllers
                         DateOfBirth = u.DateOfBirth,
                         DateCreateAccount = u.DateCreateAccount,
                         DateUpdateAccount = u.DateUpdateAccount,
-                        RoleID = u.RoleID
+                        RoleID = u.RoleID,
+                        RoleName = u.Roles.Name
                     });
 
                     return Ok(userViewModels);
