@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Reflection;
@@ -69,8 +70,20 @@ builder.Services.AddScoped<IVacationsCalendarRepository, VacationsCalendarReposi
 builder.Services.AddScoped<IVacationsService, VacationsService>();
 builder.Services.AddScoped<IVacationsRepository, VacationsRepository>();
 
+
+var holidays = new List<DateTime>();
+
 // Ajout des services nécessaires à l'injection de dépendances de Vacations Balance (solde de congé)
-builder.Services.AddScoped<IVacationsBalanceService, VacationsBalanceService>();
+builder.Services.AddScoped<IVacationsBalanceService>(provider =>
+    new VacationsBalanceService(
+        provider.GetService<IVacationsRepository>(),
+        provider.GetService<IUsersRepository>(),
+        provider.GetService<IOptions<VacationOptions>>(),
+        provider.GetService<IVacationsBalanceRepository>(),
+        holidays // Passer la liste de dates ici
+    )
+);
+
 builder.Services.AddScoped<IVacationsBalanceRepository, VacationsBalanceRepository>();
 
 // Ajout des services nécessaires à l'injection de dépendances de Vacations Report (rapport de congé)
