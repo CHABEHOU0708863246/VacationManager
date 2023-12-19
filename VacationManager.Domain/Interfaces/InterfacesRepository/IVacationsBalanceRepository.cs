@@ -16,5 +16,7 @@ namespace VacationManager.Domain.Interfaces.InterfacesRepository
 
         // Méthode pour récupérer les détails des congés par utilisateur
         Task<IEnumerable<VacationDetailsDTO>> GetVacationDetailsByUserIdAsync(int userId, CancellationToken cancellationToken);
+
+
     }
 }

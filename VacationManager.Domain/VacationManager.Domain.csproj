@@ -30,10 +30,4 @@
     <Folder Include="Models\Authentification\" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Reference Include="InfiSoftware.Common.Data">
-      <HintPath>..\..\..\..\Downloads\InfiSoftware.Common.Data (lecture fichier pdf).dll</HintPath>
-    </Reference>
-  </ItemGroup>
-
 </Project>

@@ -12,7 +12,7 @@ using VacationManager.Infrastructure.Data;
 namespace VacationManager.Infrastructure.Migrations
 {
     [DbContext(typeof(VacationManagerDbContext))]
-    [Migration("20231201170142_Initial")]
+    [Migration("20231218143903_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

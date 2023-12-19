@@ -106,6 +106,7 @@ namespace VacationManager.WebAPI.Controllers
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> CreateRoles([FromBody] RolesDTO roleDTO, CancellationToken cancellationToken)
         {
             try
@@ -132,6 +133,9 @@ namespace VacationManager.WebAPI.Controllers
         /// Modifie un rôle par son ID.
         /// </summary>
         [HttpPut("{id}")]
+        [SwaggerResponse(200, "Rôle modifié avec succès.", typeof(RolesDTO))]
+        [SwaggerResponse(404, "Rôle non trouvé.")]
+        [SwaggerResponse(500, "Erreur serveur interne.")]
         public async Task<IActionResult> UpdateRoles(int id, [FromBody] RolesDTO roleDTO, CancellationToken cancellationToken)
         {
             try
@@ -172,6 +176,7 @@ namespace VacationManager.WebAPI.Controllers
         /// <returns>204 No Content si la suppression réussit.</returns>
         [HttpDelete("{id}")]
         [SwaggerResponse(204, "Rôle supprimé avec succès.")]
+        [SwaggerResponse(404, "Rôle non trouvé.")]
         [SwaggerResponse(500, "Erreur serveur interne.")]
         public async Task<IActionResult> DeleteUsers(int id, CancellationToken cancellationToken)
         {

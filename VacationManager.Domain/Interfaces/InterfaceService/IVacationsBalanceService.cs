@@ -10,10 +10,14 @@ namespace VacationManager.Domain.Interfaces.InterfaceService
 
         // Cette méthode met à jour le solde de congés d'un utilisateur spécifique.
         Task<bool> UpdateVacationBalanceAsync(int userId, DateTime startDate, DateTime endDate, CancellationToken cancellationToken);
-        // Cette methodde retourne les solde de conge des utilisateurs en specifiant leur ID
-        Task<VacationDetailsDTO> GetVacationDetailsByUserIdAsync(int userId, CancellationToken cancellationToken);
 
-        // Cette methode retourne tous les solde de congés dans les moindres details
+        // Cette méthode retourne les détails des congés d'un utilisateur spécifique.
+        Task<IEnumerable<VacationDetailsDTO>> GetVacationDetailsByUserIdAsync(int userId, CancellationToken cancellationToken);
+
+        // Cette méthode retourne tous les détails des congés dans les moindres détails.
         Task<IEnumerable<VacationDetailsDTO>> GetAllVacationDetailsAsync(CancellationToken cancellationToken);
+
+        // Cette méthode permet de valider ou de refuser les congés d'un utilisateur.
+        Task<bool> ApproveOrRejectVacationAsync(int vacationId, string newStatus, CancellationToken cancellationToken);
     }
 }

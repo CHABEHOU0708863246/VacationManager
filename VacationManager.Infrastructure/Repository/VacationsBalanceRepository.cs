@@ -3,6 +3,7 @@ using VacationManager.Domain.DTO;
 using VacationManager.Domain.Interfaces.InterfacesRepository;
 using VacationManager.Domain.Models;
 using VacationManager.Infrastructure.Data;
+using static VacationManager.Domain.Models.Vacations;
 
 namespace VacationManager.Infrastructure.Repository
 {
@@ -93,6 +94,7 @@ namespace VacationManager.Infrastructure.Repository
         }
         #endregion
 
+        #region Donne les details de congé en fonction de l'id de l'utilisateur ou employee
         public async Task<IEnumerable<VacationDetailsDTO>> GetVacationDetailsByUserIdAsync(int userId, CancellationToken cancellationToken)
         {
             // Récupère les vacances de l'utilisateur
@@ -123,8 +125,9 @@ namespace VacationManager.Infrastructure.Repository
 
             return new List<VacationDetailsDTO>() { vacationDetailsDTO };
         }
+        #endregion
 
-
+        #region Calcul du solde restant
         public async Task<VacationsBalance> CalculateRemainingBalance(int userId, CancellationToken cancellationToken)
         {
             var existingBalance = await GetByUserIdAsync(userId, cancellationToken);
@@ -132,5 +135,34 @@ namespace VacationManager.Infrastructure.Repository
 
             return existingBalance;
         }
+        #endregion
+
+
+        #region Cette méthode permet de valider ou de refuser les congés d'un utilisateur et de mettre à jour cela depuis la base de donnée
+        public async Task<bool> ValidateOrRejectVacationAsync(int vacationId, CancellationToken cancellationToken)
+        {
+            var vacation = await _databaseContext.Vacations.FirstOrDefaultAsync(v => v.Id == vacationId, cancellationToken);
+
+            if (vacation == null)
+            {
+                throw new ArgumentException("La demande de congé n'existe pas");
+            }
+
+            if ((vacation.EndDate - vacation.StartDate).Days > 10)
+            {
+                vacation.Status = VacationsStatus.Approuve;
+            }
+            else
+            {
+                vacation.Status = VacationsStatus.Rejete;
+            }
+
+            await _databaseContext.SaveChangesAsync(cancellationToken);
+
+            return true;
+        }
+        #endregion
+
+
     }
 }

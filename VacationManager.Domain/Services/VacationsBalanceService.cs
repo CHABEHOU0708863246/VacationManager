@@ -4,19 +4,21 @@ using VacationManager.Domain.DTO;
 using VacationManager.Domain.Interfaces.InterfaceService;
 using VacationManager.Domain.Interfaces.InterfacesRepository;
 using VacationManager.Domain.Models;
+using static VacationManager.Domain.Models.Vacations;
 
 namespace VacationManager.Domain.Services
 {
     public class VacationsBalanceService : IVacationsBalanceService
     {
+        #region Dependencies
         private readonly IVacationsRepository _vacationsRepository;
         private readonly int _initialBalance;
         private readonly IUsersRepository _usersRepository;
         private readonly IVacationsBalanceRepository _vacationsBalanceRepository;
         private readonly List<DateTime> _holidays;
+        #endregion
 
-
-
+        #region Constructeur
         public VacationsBalanceService(IVacationsRepository vacationsRepository, IUsersRepository usersRepository, IOptions<VacationOptions> options, IVacationsBalanceRepository vacationsBalanceRepository, List<DateTime> holidays)
         {
             _vacationsRepository = vacationsRepository;
@@ -25,6 +27,7 @@ namespace VacationManager.Domain.Services
             _vacationsBalanceRepository = vacationsBalanceRepository;
             _holidays = holidays;
         }
+        #endregion
 
         #region Récupération des détails de congés de tous les utilisateurs
         public async Task<IEnumerable<VacationDetailsDTO>> GetAllVacationDetailsAsync(CancellationToken cancellationToken)
@@ -38,48 +41,38 @@ namespace VacationManager.Domain.Services
             // Attend que toutes les tâches de récupération des détails de vacances soient terminées
             var vacationDetails = await Task.WhenAll(vacationDetailsTasks);
 
+            // Aplatit le tableau de Task<IEnumerable<VacationDetailsDTO>> en un seul IEnumerable<VacationDetailsDTO>
+            var allVacationDetails = vacationDetails.SelectMany(vd => vd);
+
             // Renvoie la liste complète des détails de vacances
-            return vacationDetails;
+            return allVacationDetails;
         }
         #endregion
 
         #region Récupération des détails de congés d'un utilisateur spécifique
-        public async Task<VacationDetailsDTO> GetVacationDetailsByUserIdAsync(int userId, CancellationToken cancellationToken)
+        public async Task<IEnumerable<VacationDetailsDTO>> GetVacationDetailsByUserIdAsync(int userId, CancellationToken cancellationToken)
         {
             var vacations = await _vacationsRepository.GetVacationsWithUsersByUserIdAsync(userId, cancellationToken);
 
             if (vacations == null || !vacations.Any())
             {
-                return new VacationDetailsDTO
-                {
-                    UserId = userId,
-                    UserName = string.Empty,
-                    StartDate = DateTime.MinValue,
-                    EndDate = DateTime.MinValue,
-                    Type = string.Empty,
-                    Justification = string.Empty,
-                    InitialBalance = _initialBalance,
-                    UsedBalance = 0,
-                    RemainingBalance = 0
-                };
+                return new List<VacationDetailsDTO>();
             }
 
-            var usedVacationDays = CalculateUsedVacationDaysWithHoliday(vacations, userId);
-
-            var remainingVacationDays = _initialBalance - usedVacationDays;
-
-            return new VacationDetailsDTO
+            var vacationDetails = vacations.Select(v => new VacationDetailsDTO
             {
                 UserId = userId,
-                UserName = vacations.First().Users.FirstName + " " + vacations.First().Users.LastName,
-                StartDate = vacations.First().StartDate,
-                EndDate = vacations.First().EndDate,
-                Type = vacations.First().Type,
-                Justification = vacations.First().Justification,
+                UserName = v.Users.FirstName + " " + v.Users.LastName,
+                StartDate = v.StartDate,
+                EndDate = v.EndDate,
+                Type = v.Type,
+                Justification = v.Justification,
                 InitialBalance = _initialBalance,
-                UsedBalance = usedVacationDays,
-                RemainingBalance = remainingVacationDays
-            };
+                UsedBalance = CalculateUsedVacationDaysWithHoliday(vacations, userId),
+                RemainingBalance = _initialBalance - CalculateUsedVacationDaysWithHoliday(vacations, userId)
+            });
+
+            return vacationDetails;
         }
         #endregion
 
@@ -214,6 +207,40 @@ namespace VacationManager.Domain.Services
         {
             return _holidays.Contains(date);
         }
+        #endregion
+
+        #region Cette méthode permet de valider ou de refuser les congés d'un utilisateur.
+        public async Task<bool> ApproveOrRejectVacationAsync(int vacationId, string newStatus, CancellationToken cancellationToken)
+        {
+            var vacation = await _vacationsRepository.GetByIdAsync(vacationId, cancellationToken);
+
+            if (vacation == null)
+            {
+                throw new ArgumentException("La demande de congé n'existe pas");
+            }
+
+            // Convertir la chaîne newStatus en énumération VacationsStatus
+            if (!Enum.TryParse(newStatus, out VacationsStatus status))
+            {
+                throw new ArgumentException("Le statut n'est pas valide");
+            }
+
+            // Vérifier si le nouveau statut est différent du statut actuel
+            if (vacation.Status == status)
+            {
+                throw new ArgumentException("Le statut est déjà défini sur " + newStatus);
+            }
+
+            // Modifier le statut de la demande de congé
+            vacation.Status = status;
+
+            // Enregistrer les modifications dans le dépôt
+            bool updateResult = await _vacationsRepository.UpdateAsync(vacation, cancellationToken);
+
+            // Retourner le résultat de la mise à jour
+            return updateResult;
+        }
+
         #endregion
 
     }
