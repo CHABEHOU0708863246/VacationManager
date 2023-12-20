@@ -7,8 +7,9 @@ namespace VacationManager.Domain.Interfaces.InterfaceService
     /// </summary>
     public interface IUsersService
     {
-        // Récupère tous les utilisateurs avec pagination
-        Task<IEnumerable<Users>> GetPaginatedUsersAsync(int page, int pageSize, CancellationToken cancellationToken);
+
+        // Renvoie une page d'utilisateurs avec pagination
+        Task<IEnumerable<Users>> GetUsersWithPaginationAsync(int pageNumber, int pageSize, CancellationToken cancellationToken);
 
         // Récupère tous les utilisateurs
         Task<IEnumerable<Users>> GetAllUsersAsync(CancellationToken cancellationToken);

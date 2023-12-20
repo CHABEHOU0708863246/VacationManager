@@ -18,21 +18,22 @@ namespace VacationManager.WebAPI.Controllers
             _usersService = usersService;
         }
 
+
         /// <summary>
-        /// Retourne les utiliseurs en utilisant la pagination
+        /// Retourne la liste paginée des utilisateurs (5 utilisateurs par page).
         /// </summary>
-        /// <param name="cancellationToken"></param>
-        /// <param name="page"></param>
+        /// <param name="pageNumber"></param>
         /// <param name="pageSize"></param>
+        /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        [HttpGet("{pagination}")]
-        [SwaggerResponse(200, "Liste de utilisateurs retournée avec succès.", typeof(IEnumerable<UsersDTO>))]
+        [HttpGet("paginate")]
+        [SwaggerResponse(200, "Liste paginée des utilisateurs retournée avec succès.", typeof(IEnumerable<UsersDTO>))]
         [SwaggerResponse(500, "Erreur serveur interne.")]
-        public async Task<IActionResult> GetAllUsers(CancellationToken cancellationToken, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+        public async Task<IActionResult> GetAllUsersWithoutPagination(CancellationToken cancellationToken, int pageNumber = 1, int pageSize = 5)
         {
             try
             {
-                var users = await _usersService.GetPaginatedUsersAsync(page, pageSize, cancellationToken);
+                var users = await _usersService.GetUsersWithPaginationAsync(pageNumber, pageSize, cancellationToken);
 
                 if (users != null && users.Any())
                 {
@@ -77,7 +78,7 @@ namespace VacationManager.WebAPI.Controllers
         /// Retourne tous les utilisateurs.
         /// </summary>
         /// <returns>La liste de tous les rôles.</returns>
-        [HttpGet]
+        [HttpGet("all")]
         [SwaggerResponse(200, "Liste de utilisateurs retournée avec succès.", typeof(IEnumerable<UsersDTO>))]
         [SwaggerResponse(404, "Utilisateur non trouvé.")]
         [SwaggerResponse(500, "Erreur serveur interne.")]

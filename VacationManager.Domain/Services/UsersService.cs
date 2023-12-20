@@ -17,11 +17,16 @@ namespace VacationManager.Domain.Services
         }
 
         #region Retourne les utilisateurs en utilisant une pagination
-        public async Task<IEnumerable<Users>> GetPaginatedUsersAsync(int page, int pageSize, CancellationToken cancellationToken)
+        public async Task<IEnumerable<Users>> GetUsersWithPaginationAsync(int pageNumber, int pageSize, CancellationToken cancellationToken)
         {
-            // Implement logic to paginate users using the repository
-            return await _usersRepository.GetPaginatedUsersAsync(page, pageSize, cancellationToken);
+            int startIndex = (pageNumber - 1) * pageSize;
+
+            // Récupérer les utilisateurs en fonction de l'index de départ et de la taille de la page
+            var users = await _usersRepository.GetUsersWithPaginationAsync(startIndex, pageSize, cancellationToken);
+
+            return users;
         }
+
         #endregion
 
         #region Recupère tous les utilisateurs de manière asynchrone

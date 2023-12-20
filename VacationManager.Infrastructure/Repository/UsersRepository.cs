@@ -19,16 +19,15 @@ namespace VacationManager.Infrastructure.Repository
             _databaseContext = databasecontext;
         }
 
-        #region Retourne les utilisateurs en utilisant une pagination
-        public async Task<IEnumerable<Users>> GetPaginatedUsersAsync(int page, int pageSize, CancellationToken cancellationToken)
+        #region Récupère une liste paginée d'utilisateurs à partir de la base de données.
+        public async Task<IEnumerable<Users>> GetUsersWithPaginationAsync(int startIndex, int pageSize, CancellationToken cancellationToken)
         {
-
-            var users = await _databaseContext.Users
-                                .Skip((page - 1) * pageSize)
-                                .Take(pageSize)
-                                .ToListAsync(cancellationToken);
-
-            return users;
+            return await _databaseContext.Users
+                                        .Include(u => u.Roles)
+                                        .OrderBy(u => u.Id)
+                                        .Skip(startIndex)
+                                        .Take(pageSize)
+                                        .ToListAsync(cancellationToken);
         }
         #endregion
 

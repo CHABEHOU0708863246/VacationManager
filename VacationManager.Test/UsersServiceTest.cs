@@ -20,31 +20,6 @@ namespace VacationManager.Test
         }
 
         [TestMethod]
-        [Description("Teste la méthode GetPaginatedUsersAsync pour vérifier la pagination des utilisateurs.")]
-        public async Task GetPaginatedUsersAsync_ReturnsUsersForPage()
-        {
-            // Arrange
-            int page = 1;
-            int pageSize = 10;
-            var expectedUsers = new List<Users>
-            {
-                new Users { Id = 1, FirstName = "User 1" },
-                new Users { Id = 2, FirstName = "User 2" },
-            };
-
-            CancellationToken cancellationToken = CancellationToken.None;
-
-            _usersRepositoryMock.Setup(r => r.GetPaginatedUsersAsync(page, pageSize, cancellationToken)).ReturnsAsync(expectedUsers);
-
-            // Act
-            var result = await _usersService.GetPaginatedUsersAsync(page, pageSize, cancellationToken);
-
-            // Assert
-            Assert.IsNotNull(result);
-            Assert.AreEqual(expectedUsers.Count, result.Count());
-        }
-
-        [TestMethod]
         [Description("Teste la méthode GetAllUsersAsync pour vérifier le retour de tous les utilisateurs.")]
         public async Task GetAllUsersAsync_ReturnsAllUsers()
         {

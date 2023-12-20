@@ -162,16 +162,7 @@ namespace VacationManager.Test
             var result = await _vacationsBalanceService.GetVacationDetailsByUserIdAsync(userId, CancellationToken.None);
 
             // Assert
-            /*Assert.IsNotNull(result);
-            Assert.AreEqual(userId, result.UserId);
-            Assert.AreEqual(users[0].FirstName + " " + users[0].LastName, result.UserName);
-            Assert.AreEqual(vacations[0].StartDate, result.StartDate);
-            Assert.AreEqual(vacations[0].EndDate, result.EndDate);
-            Assert.AreEqual(vacations[0].Type, result.Type);
-            Assert.AreEqual(vacations[0].Justification, result.Justification);
-            Assert.AreEqual(23, result.InitialBalance);
-            Assert.AreEqual(0, result.UsedBalance);
-            Assert.AreEqual(23, result.RemainingBalance);*/
+            Assert.IsNotNull(result);
         }
 
     }

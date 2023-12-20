@@ -7,8 +7,8 @@ namespace VacationManager.Domain.Interfaces.InterfacesRepository
     /// </summary>
     public interface IUsersRepository
     {
-        // Récupère tous les utilisateurs de manière asynchrone à partir de la source de données en utilisant la pagination
-        Task<IEnumerable<Users>> GetPaginatedUsersAsync(int page, int pageSize, CancellationToken cancellationToken);
+        // Méthode pour la pagination des utilisateurs
+        Task<IEnumerable<Users>> GetUsersWithPaginationAsync(int startIndex, int pageSize, CancellationToken cancellationToken);
 
         // Récupère tous les utilisateurs de manière asynchrone à partir de la source de données.
         Task<IEnumerable<Users>> GetAllAsync(CancellationToken cancellationToken);

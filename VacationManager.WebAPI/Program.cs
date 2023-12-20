@@ -116,7 +116,7 @@ builder.Services.AddSwaggerGen(c =>
     {
         Title = "Vacation Manager API",
         Version = "V1.0.0",
-        Description = "<h3>API pour la gestion d'une application web de gestion des congés pour les employés et les gestionnaires au sein d'une entreprise, cas de : <strong>INFI SOFTWARE</strong></h3>",
+        Description = "<h3>API d'une application web de gestion des congés pour les employés et les gestionnaires au sein d'une entreprise, cas de : <strong>INFI SOFTWARE</strong></h3>",
         TermsOfService = new Uri("https://example.com/terms"),
         Contact = new OpenApiContact
         {
