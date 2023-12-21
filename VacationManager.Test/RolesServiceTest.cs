@@ -21,8 +21,8 @@ namespace VacationManager.Test
             _rolesService = new RolesService(_rolesRepositoryMock.Object);
         }
 
+        #region Teste la méthode GetAllRolesAsync pour s'assurer qu'elle renvoie une liste de rôles correcte.
         [TestMethod]
-        [Description("Teste la méthode GetAllRolesAsync pour s'assurer qu'elle renvoie une liste de rôles correcte.")]
         public async Task GetAllRolesAsync_ReturnListOfRoles()
         {
             //Arrange 
@@ -45,9 +45,10 @@ namespace VacationManager.Test
             //Assert: Vérifier si le résultat réel correspond au résultat attendu
             CollectionAssert.AreEqual(expectedRoles, new List<Roles>(roles));
         }
+        #endregion
 
+        #region Teste la méthode GetRolesByIdAsync pour vérifier qu'elle renvoie le rôle attendu.
         [TestMethod]
-        [Description("Teste la méthode GetRolesByIdAsync pour vérifier qu'elle renvoie le rôle attendu.")]
         public async Task GetRolesByIdAsync_ReturnsRole()
         {
             // Arrange
@@ -66,9 +67,10 @@ namespace VacationManager.Test
             Assert.AreEqual(expectedRole.Id, role.Id);
             Assert.AreEqual(expectedRole.Name, role.Name);
         }
+        #endregion
 
+        #region Teste la méthode GetRolesByIdAsync avec un ID de rôle invalide.
         [TestMethod]
-        [Description("Teste la méthode GetRolesByIdAsync avec un ID de rôle invalide.")]
         public async Task GetRolesByIdAsync_InvalidId_ThrowsArgumentException()
         {
             // Arrange
@@ -82,9 +84,10 @@ namespace VacationManager.Test
                 await _rolesService.GetRolesByIdAsync(invalidRoleId, cancellationToken);
             });
         }
+        #endregion
 
+        #region Teste la méthode CreateRolesAsync pour vérifier la création d'un nouveau rôle.
         [TestMethod]
-        [Description("Teste la méthode CreateRolesAsync pour vérifier la création d'un nouveau rôle.")]
         public async Task CreateRolesAsync_CreatesNewRole()
         {
             // Arrange
@@ -102,9 +105,10 @@ namespace VacationManager.Test
             Assert.AreEqual(newRole.Id, createdRole.Id);
             Assert.AreEqual(newRole.Name, createdRole.Name);
         }
+        #endregion
 
+        #region Teste la méthode CreateRolesAsync avec un rôle null.
         [TestMethod]
-        [Description("Teste la méthode CreateRolesAsync avec un rôle null.")]
         public async Task CreateRolesAsync_NullRole_ThrowsArgumentNullException()
         {
             // Arrange
@@ -118,9 +122,10 @@ namespace VacationManager.Test
                 await _rolesService.CreateRolesAsync(nullRole, cancellationToken);
             });
         }
+        #endregion
 
+        #region Teste la méthode UpdateRolesAsync pour vérifier la mise à jour d'un rôle.
         [TestMethod]
-        [Description("Teste la méthode UpdateRolesAsync pour vérifier la mise à jour d'un rôle.")]
         public async Task UpdateRolesAsync_UpdatesExistingRole()
         {
             // Arrange
@@ -140,9 +145,10 @@ namespace VacationManager.Test
             Assert.IsTrue(result);
             Assert.AreEqual(updatedRole.Name, existingRole.Name);
         }
+        #endregion
 
+        #region Teste la méthode UpdateRolesAsync avec un ID invalide.
         [TestMethod]
-        [Description("Teste la méthode UpdateRolesAsync avec un ID invalide.")]
         public async Task UpdateRolesAsync_InvalidId_ThrowsArgumentNullException()
         {
             // Arrange
@@ -158,9 +164,10 @@ namespace VacationManager.Test
                 await _rolesService.UpdateRolesAsync(invalidId, role, cancellationToken);
             });
         }
+        #endregion
 
+        #region Teste la méthode UpdateRolesAsync avec un rôle null.
         [TestMethod]
-        [Description("Teste la méthode UpdateRolesAsync avec un rôle null.")]
         public async Task UpdateRolesAsync_NullRole_ThrowsArgumentNullException()
         {
             // Arrange
@@ -176,9 +183,10 @@ namespace VacationManager.Test
                 await _rolesService.UpdateRolesAsync(roleId, nullRole, cancellationToken);
             });
         }
+        #endregion
 
+        #region Teste la méthode DeleteRolesAsync pour vérifier la suppression d'un rôle.
         [TestMethod]
-        [Description("Teste la méthode DeleteRolesAsync pour vérifier la suppression d'un rôle.")]
         public async Task DeleteRolesAsync_DeletesExistingRole()
         {
             // Arrange
@@ -195,9 +203,10 @@ namespace VacationManager.Test
             // Assert
             Assert.IsTrue(result);
         }
+        #endregion
 
+        #region Teste la méthode DeleteRolesAsync avec un ID invalide.
         [TestMethod]
-        [Description("Teste la méthode DeleteRolesAsync avec un ID invalide.")]
         public async Task DeleteRolesAsync_InvalidId_ThrowsArgumentNullException()
         {
             // Arrange
@@ -212,5 +221,6 @@ namespace VacationManager.Test
                 await _rolesService.DeleteRolesAsync(invalidId, cancellationToken);
             });
         }
+        #endregion
     }
 }

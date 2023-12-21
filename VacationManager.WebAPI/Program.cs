@@ -36,7 +36,6 @@ builder.Services.AddDbContext<VacationManagerDbContext>(
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
 
 // Configuration de l'authentification et du format de token
-//builder.Services.AddSingleton<JwtSettings>(builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>());
 
 var jwtSettings = builder.Services.BuildServiceProvider().GetService<JwtSettings>();
 

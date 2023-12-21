@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using VacationManager.Infrastructure.Data;
 
@@ -11,9 +12,10 @@ using VacationManager.Infrastructure.Data;
 namespace VacationManager.Infrastructure.Migrations
 {
     [DbContext(typeof(VacationManagerDbContext))]
-    partial class VacationManagerDbContextModelSnapshot : ModelSnapshot
+    [Migration("20231221111328_Two")]
+    partial class Two
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -224,25 +226,22 @@ namespace VacationManager.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
+                    b.Property<int>("ApprovedRequests")
+                        .HasColumnType("int");
+
                     b.Property<int>("CurrentBalance")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PendingRequests")
+                        .HasColumnType("int");
+
+                    b.Property<int>("RejectedRequests")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("ReportDate")
                         .HasColumnType("datetime2");
 
                     b.Property<int>("Status")
-                        .HasColumnType("int");
-
-                    b.Property<int>("TotalApproved")
-                        .HasColumnType("int");
-
-                    b.Property<int>("TotalDemand")
-                        .HasColumnType("int");
-
-                    b.Property<int>("TotalPending")
-                        .HasColumnType("int");
-
-                    b.Property<int>("TotalRejected")
                         .HasColumnType("int");
 
                     b.Property<int>("UserId")

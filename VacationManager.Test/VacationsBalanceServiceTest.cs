@@ -63,9 +63,9 @@ namespace VacationManager.Test
         }
 
 
-
+        #region Teste la méthode UpdateVacationBalanceAsync pour vérifier la mise à jour du solde de congés d'un utilisateur
         [TestMethod]
-        [Description("Teste la méthode UpdateVacationBalanceAsync pour vérifier la mise à jour du solde de congés d'un utilisateur")]
+        [Description("")]
         public async Task UpdateVacationBalanceAsync_ShouldUpdateVacationBalance()
         {
             // Arrange
@@ -91,6 +91,7 @@ namespace VacationManager.Test
             // Assert
             Assert.IsTrue(result);
         }
+        #endregion
 
 
         [TestMethod]
@@ -121,8 +122,8 @@ namespace VacationManager.Test
             Assert.AreEqual(23, result.RemainingVacationBalance);
         }
 
+        #region Teste la méthode ResetInitialBalanceAsync pour vérifier la réinitialisation du solde initial de congés
         [TestMethod]
-        [Description("Teste la méthode ResetInitialBalanceAsync pour vérifier la réinitialisation du solde initial de congés")]
         public async Task ResetInitialBalanceAsync_ShouldResetVacationBalance()
         {
             // Arrange
@@ -140,7 +141,9 @@ namespace VacationManager.Test
             // Assert
             Assert.AreEqual(0, vacationBalance.InitialVacationBalance);
         }
+        #endregion
 
+        #region Teste la méthode GetVacationDetailsByUserIdAsync pour vérifier le retour des details de conges par utilisateur
         [TestMethod]
         public async Task GetVacationDetailsByUserIdAsync_ShouldReturnVacationDetails()
         {
@@ -164,6 +167,7 @@ namespace VacationManager.Test
             // Assert
             Assert.IsNotNull(result);
         }
+        #endregion
 
     }
 }

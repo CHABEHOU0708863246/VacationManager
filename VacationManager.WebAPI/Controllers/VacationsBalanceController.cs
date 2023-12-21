@@ -16,6 +16,7 @@ namespace VacationManager.WebAPI.Controllers
             _vacationsBalanceService = vacationsBalanceService;
         }
 
+        #region Endpoint qui retourne le solde de congé de tous les utilisateurs
         /// <summary>
         /// Retourne le solde de congé de tous les utilisateurs
         /// </summary>
@@ -38,10 +39,9 @@ namespace VacationManager.WebAPI.Controllers
                 return StatusCode(500, $"Une erreur est survenue : {ex.Message}");
             }
         }
+        #endregion
 
-
-
-
+        #region Endpoint qui rerourne le solde de congé en fonction de l'id de l'utilisateur
         /// <summary>
         /// Rerourne le solde de congé en fonction de l'id de l'utilisateur
         /// </summary>
@@ -76,8 +76,9 @@ namespace VacationManager.WebAPI.Controllers
                 return StatusCode(500, $"Une erreur s'est produite : {ex.Message}");
             }
         }
+        #endregion
 
-
+        #region Endpoint qui met a jour la balance de congés
         /// <summary>
         /// Met a jour la balance de congés
         /// </summary>
@@ -132,7 +133,9 @@ namespace VacationManager.WebAPI.Controllers
                 return StatusCode(500, $"Une erreur s'est produite : {ex.Message}");
             }
         }
+        #endregion
 
+        #region Endpoint pour la Validation ou le refus de congés
         /// <summary>
         /// Validation ou refus de congés
         /// </summary>
@@ -170,6 +173,7 @@ namespace VacationManager.WebAPI.Controllers
                 return StatusCode(500, $"Une erreur s'est produite : {ex.Message}");
             }
         }
+        #endregion
 
     }
 }

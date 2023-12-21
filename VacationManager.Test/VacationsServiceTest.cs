@@ -21,8 +21,8 @@ namespace VacationManager.Test
             _vacationsService = new VacationsService(_vacationsRepositoryMock.Object);
         }
 
+        #region Teste la méthode GetAllVacationsAsync pour vérifier la récupération de toutes les vacances.
         [TestMethod]
-        [Description("Teste la méthode GetAllVacationsAsync pour vérifier la récupération de toutes les vacances.")]
         public async Task GetAllVacationsAsync_ReturnsAllVacations()
         {
             // Arrange
@@ -43,9 +43,10 @@ namespace VacationManager.Test
             // Assert
             CollectionAssert.AreEqual(expectedVacations, new List<Vacations>(result));
         }
+        #endregion
 
+        #region Teste la méthode GetVacationsByIdAsync pour vérifier la récupération d'un congé par son ID.
         [TestMethod]
-        [Description("Teste la méthode GetVacationsByIdAsync pour vérifier la récupération d'un congé par son ID.")]
         public async Task GetVacationsByIdAsync_ReturnsVacationById()
         {
             // Arrange
@@ -62,10 +63,10 @@ namespace VacationManager.Test
             // Assert
             Assert.AreEqual(expectedVacation, result);
         }
+        #endregion
 
-
+        #region Teste la méthode CreateVacationsAsync pour vérifier la création d'un nouveau congé.
         [TestMethod]
-        [Description("Teste la méthode CreateVacationsAsync pour vérifier la création d'un nouveau congé.")]
         public async Task CreateVacationsAsync_ReturnsCreatedVacation()
         {
             // Arrange
@@ -82,10 +83,10 @@ namespace VacationManager.Test
             Assert.AreEqual(newVacation, result);
             Assert.IsNotNull(result.CreatedDate); // Vérifie si la date de création est définie
         }
+        #endregion
 
-
+        #region Teste la méthode UpdateVacationsAsync pour vérifier la mise à jour d'un congé existant.
         [TestMethod]
-        [Description("Teste la méthode UpdateVacationsAsync pour vérifier la mise à jour d'un congé existant.")]
         public async Task UpdateVacationsAsync_ReturnsTrueOnSuccessfulUpdate()
         {
             // Arrange
@@ -109,9 +110,10 @@ namespace VacationManager.Test
             Assert.AreEqual(existingVacation.EndDate, updatedVacation.EndDate);
             // Ajoutez d'autres assertions pour vérifier la mise à jour des autres propriétés si nécessaire
         }
+        #endregion
 
+        #region Teste la méthode DeleteVacationsAsync pour vérifier la suppression d'un congé existant.
         [TestMethod]
-        [Description("Teste la méthode DeleteVacationsAsync pour vérifier la suppression d'un congé existant.")]
         public async Task DeleteVacationsAsync_ReturnsTrueOnSuccessfulDeletion()
         {
             // Arrange
@@ -126,9 +128,10 @@ namespace VacationManager.Test
             // Assert
             Assert.IsTrue(result);
         }
+        #endregion
 
+        #region Teste la méthode DeleteVacationsAsync avec un ID invalide.
         [TestMethod]
-        [Description("Teste la méthode DeleteVacationsAsync avec un ID invalide.")]
         public async Task DeleteVacationsAsync_InvalidId_ReturnsFalse()
         {
             // Arrange
@@ -141,6 +144,7 @@ namespace VacationManager.Test
             // Assert
             Assert.IsFalse(result);
         }
+        #endregion
 
     }
 }

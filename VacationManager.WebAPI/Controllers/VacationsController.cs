@@ -19,6 +19,7 @@ namespace VacationManager.WebAPI.Controllers
             _vacationsService = vacationsService;
         }
 
+        #region Endpoint qui retourne tous les vacations (congé).
         /// <summary>
         /// Retourne tous les vacations (congé).
         /// </summary>
@@ -69,9 +70,9 @@ namespace VacationManager.WebAPI.Controllers
                 return StatusCode(500, ex.Message);
             }
         }
+        #endregion
 
-
-
+        #region Endpoint qui retourne un vacation par son ID.
         /// <summary>
         /// Retourne un vacation par son ID.
         /// </summary>
@@ -97,7 +98,9 @@ namespace VacationManager.WebAPI.Controllers
                 return StatusCode(500, $"Une erreur s’est produite lors de la récupération de congé : {ex.Message}");
             }
         }
+        #endregion
 
+        #region Endpoint qui cree un nouveau congé
         /// <summary>
         /// Cree un nouveau congé
         /// </summary>
@@ -112,9 +115,8 @@ namespace VacationManager.WebAPI.Controllers
         ///          "StartDate": "datetime",
         ///          "EndDate": "datetime",
         ///          "Type": "string",
-        ///          "Status": "string",
+        ///          "Status": "number",
         ///          "CreatedDate": "datetime",
-        ///          "ApprobationDate": "datetime",
         ///          "Comment": "string
         ///          "Justification" : "string",
         ///         }
@@ -159,7 +161,9 @@ namespace VacationManager.WebAPI.Controllers
                 return StatusCode(500, $"Une erreur s’est produite lors de la création de congé : {ex.Message}");
             }
         }
+        #endregion
 
+        #region Endpoint qui Modifie un congé par son ID.
         /// <summary>
         /// Modifie un congé par son ID.
         /// </summary>
@@ -202,7 +206,9 @@ namespace VacationManager.WebAPI.Controllers
                 return StatusCode(500, $"Une erreur s’est produite lors de la mise à jour de l'utilisateur : {ex.Message}");
             }
         }
+        #endregion
 
+        #region Endpoint qui Supprime un vacation par son ID.
         /// <summary>
         /// Supprime un vacation par son ID.
         /// </summary>
@@ -231,5 +237,6 @@ namespace VacationManager.WebAPI.Controllers
                 return StatusCode(500, $"Une erreur s’est produite lors de la suppression de l'utilisateur : {ex.Message}");
             }
         }
+        #endregion
     }
 }

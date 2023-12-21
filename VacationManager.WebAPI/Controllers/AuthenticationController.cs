@@ -18,6 +18,7 @@ namespace VacationManager.WebAPI.Controllers
             _authenticationService = authenticationService;
         }
 
+        #region Endpoint pour l'Authentification d'un utilisateur en utilisant un e-mail et un mot de passe.
         /// <summary>
         /// Authentification d'un utilisateur en utilisant un e-mail et un mot de passe.
         /// </summary>
@@ -53,6 +54,7 @@ namespace VacationManager.WebAPI.Controllers
                 Role = response.Role,
             });
         }
+        #endregion
 
     }
 }

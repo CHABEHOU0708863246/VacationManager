@@ -17,6 +17,7 @@ namespace VacationManager.WebAPI.Controllers
             _rolesService = rolesService;
         }
 
+        #region Enpoint qui retourne tous les rôles.
         /// <summary>
         /// Retourne tous les rôles.
         /// </summary>
@@ -55,9 +56,9 @@ namespace VacationManager.WebAPI.Controllers
                 return StatusCode(500, ex.Message);
             }
         }
+        #endregion
 
-
-
+        #region Endpoint qui retourne un rôle par son ID.
         /// <summary>
         /// Retourne un rôle par son ID.
         /// </summary>
@@ -85,7 +86,9 @@ namespace VacationManager.WebAPI.Controllers
                 return StatusCode(500, $"Une erreur s’est produite lors de la récupération du rôle : {ex.Message}");
             }
         }
+        #endregion
 
+        #region Endpoint qui cree un nouveau role
         /// <summary>
         /// Cree un nouveau role
         /// </summary>
@@ -128,7 +131,9 @@ namespace VacationManager.WebAPI.Controllers
                 return StatusCode(500, $"Une erreur s’est produite lors de la création du rôle : {ex.Message}");
             }
         }
+        #endregion
 
+        #region Endpoint qui modifie un rôle par son ID.
         /// <summary>
         /// Modifie un rôle par son ID.
         /// </summary>
@@ -168,7 +173,9 @@ namespace VacationManager.WebAPI.Controllers
                 return StatusCode(500, $"Une erreur s’est produite lors de la mise à jour du rôle : {ex.Message}");
             }
         }
+        #endregion
 
+        #region Endpoint qui supprime un rôle par son ID.
         /// <summary>
         /// Supprime un rôle par son ID.
         /// </summary>
@@ -198,5 +205,6 @@ namespace VacationManager.WebAPI.Controllers
                 return StatusCode(500, $"Une erreur s’est produite lors de la suppression de l'utilisateur : {ex.Message}");
             }
         }
+        #endregion
     }
 }

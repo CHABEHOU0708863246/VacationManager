@@ -10,15 +10,12 @@ namespace VacationManager.Domain.Services
 {
     public class VacationsBalanceService : IVacationsBalanceService
     {
-        #region Dependencies
         private readonly IVacationsRepository _vacationsRepository;
         private readonly int _initialBalance;
         private readonly IUsersRepository _usersRepository;
         private readonly IVacationsBalanceRepository _vacationsBalanceRepository;
         private readonly List<DateTime> _holidays;
-        #endregion
 
-        #region Constructeur
         public VacationsBalanceService(IVacationsRepository vacationsRepository, IUsersRepository usersRepository, IOptions<VacationOptions> options, IVacationsBalanceRepository vacationsBalanceRepository, List<DateTime> holidays)
         {
             _vacationsRepository = vacationsRepository;
@@ -27,7 +24,6 @@ namespace VacationManager.Domain.Services
             _vacationsBalanceRepository = vacationsBalanceRepository;
             _holidays = holidays;
         }
-        #endregion
 
         #region Récupération des détails de congés de tous les utilisateurs
         public async Task<IEnumerable<VacationDetailsDTO>> GetAllVacationDetailsAsync(CancellationToken cancellationToken)

@@ -18,7 +18,7 @@ namespace VacationManager.WebAPI.Controllers
             _usersService = usersService;
         }
 
-
+        #region Endpoint qui retourne la liste paginée des utilisateurs (5 utilisateurs par page).
         /// <summary>
         /// Retourne la liste paginée des utilisateurs (5 utilisateurs par page).
         /// </summary>
@@ -71,14 +71,14 @@ namespace VacationManager.WebAPI.Controllers
                 return StatusCode(500, $"Erreur lors de la récupération des utilisateurs : {ex.Message}");
             }
         }
+        #endregion
 
-
-
+        #region Endpoint qui retourne tous les utilisateurs.
         /// <summary>
         /// Retourne tous les utilisateurs.
         /// </summary>
         /// <returns>La liste de tous les rôles.</returns>
-        [HttpGet("all")]
+        [HttpGet]
         [SwaggerResponse(200, "Liste de utilisateurs retournée avec succès.", typeof(IEnumerable<UsersDTO>))]
         [SwaggerResponse(404, "Utilisateur non trouvé.")]
         [SwaggerResponse(500, "Erreur serveur interne.")]
@@ -125,7 +125,9 @@ namespace VacationManager.WebAPI.Controllers
                 return StatusCode(500, $"Erreur lors de la récupération de tous les utilisateurs : {ex.Message}");
             }
         }
+        #endregion
 
+        #region Endpoint retourne un utilisateur par son ID.
         /// <summary>
         /// Retourne un utilisateur par son ID.
         /// </summary>
@@ -151,7 +153,9 @@ namespace VacationManager.WebAPI.Controllers
                 return StatusCode(500, $"Une erreur s’est produite lors de la récupération de l'utilisateur : {ex.Message}");
             }
         }
+        #endregion
 
+        #region Endpoint qui cree un nouveau utilisateur
         /// <summary>
         /// Cree un nouveau utilisateur
         /// </summary>
@@ -204,7 +208,9 @@ namespace VacationManager.WebAPI.Controllers
                 return StatusCode(500, $"Erreur lors de la création de l'utilisateur : {ex.Message}");
             }
         }
+        #endregion
 
+        #region Endpoint qui modifie un utilisateur par son ID.
         /// <summary>
         /// Modifie un utilisateur par son ID.
         /// </summary>
@@ -256,7 +262,9 @@ namespace VacationManager.WebAPI.Controllers
                 return StatusCode(500, $"Erreur lors de la mise à jour de l'utilisateur : {ex.Message}");
             }
         }
+        #endregion
 
+        #region Enpoint qui supprime un utilisateur par son ID.
         /// <summary>
         /// Supprime un utilisateur par son ID.
         /// </summary>
@@ -286,5 +294,6 @@ namespace VacationManager.WebAPI.Controllers
                 return StatusCode(500, $"Une erreur s’est produite lors de la suppression de l'utilisateur : {ex.Message}");
             }
         }
+        #endregion
     }
 }
