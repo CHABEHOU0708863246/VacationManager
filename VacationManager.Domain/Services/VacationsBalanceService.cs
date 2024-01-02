@@ -57,6 +57,7 @@ namespace VacationManager.Domain.Services
 
             var vacationDetails = vacations.Select(v => new VacationDetailsDTO
             {
+                VacationId = v.Id,
                 UserId = userId,
                 UserName = v.Users.FirstName + " " + v.Users.LastName,
                 StartDate = v.StartDate,
@@ -221,23 +222,23 @@ namespace VacationManager.Domain.Services
                 throw new ArgumentException("Le statut n'est pas valide");
             }
 
-            // Vérifier si le nouveau statut est différent du statut actuel
-            if (vacation.Status == status)
+            // Modifier le statut de la demande de congé uniquement si le statut est différent du statut actuel
+            if (vacation.Status != status)
             {
-                throw new ArgumentException("Le statut est déjà défini sur " + newStatus);
+                vacation.Status = status;
+
+                // Enregistrer les modifications dans le dépôt
+                bool updateResult = await _vacationsRepository.UpdateAsync(vacation, cancellationToken);
+
+                // Retourner le résultat de la mise à jour
+                return updateResult;
             }
 
-            // Modifier le statut de la demande de congé
-            vacation.Status = status;
-
-            // Enregistrer les modifications dans le dépôt
-            bool updateResult = await _vacationsRepository.UpdateAsync(vacation, cancellationToken);
-
-            // Retourner le résultat de la mise à jour
-            return updateResult;
+            // Retourner false si le statut est déjà défini sur le statut demandé
+            return false;
         }
-
         #endregion
+
 
     }
 }

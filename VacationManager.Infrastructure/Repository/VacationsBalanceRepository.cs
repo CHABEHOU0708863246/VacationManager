@@ -136,7 +136,6 @@ namespace VacationManager.Infrastructure.Repository
             return existingBalance;
         }
         #endregion
-
         #region Cette méthode permet de valider ou de refuser les congés d'un utilisateur et de mettre à jour cela depuis la base de donnée
         public async Task<bool> ValidateOrRejectVacationAsync(int vacationId, CancellationToken cancellationToken)
         {

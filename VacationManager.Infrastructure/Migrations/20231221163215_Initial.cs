@@ -111,10 +111,12 @@ namespace VacationManager.Infrastructure.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     UserId = table.Column<int>(type: "int", nullable: false),
-                    PendingRequests = table.Column<int>(type: "int", nullable: false),
-                    ApprovedRequests = table.Column<int>(type: "int", nullable: false),
-                    RejectedRequests = table.Column<int>(type: "int", nullable: false),
+                    TotalDemand = table.Column<int>(type: "int", nullable: false),
+                    TotalPending = table.Column<int>(type: "int", nullable: false),
+                    TotalApproved = table.Column<int>(type: "int", nullable: false),
+                    TotalRejected = table.Column<int>(type: "int", nullable: false),
                     CurrentBalance = table.Column<int>(type: "int", nullable: false),
+                    Status = table.Column<int>(type: "int", nullable: false),
                     ReportDate = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>

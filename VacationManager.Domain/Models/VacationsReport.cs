@@ -19,5 +19,6 @@ namespace VacationManager.Domain.Models
         public VacationsStatus Status { get; set; } // Statut approuve ou rejete
         public DateTime ReportDate { get; set; } // Date du rapport
         public Users Users { get; set; } // Relation avec la table Users
+        public int TotalUsers { get; set; }
     }
 }

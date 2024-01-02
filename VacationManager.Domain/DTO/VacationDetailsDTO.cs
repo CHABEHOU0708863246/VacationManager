@@ -4,6 +4,7 @@ namespace VacationManager.Domain.DTO
 {
     public class VacationDetailsDTO
     {
+        public int VacationId { get; set; }
         public int UserId { get; set; }
         public string UserName { get; set; }
         public DateTime StartDate { get; set; } // Correspondant à la propriété de Vacations

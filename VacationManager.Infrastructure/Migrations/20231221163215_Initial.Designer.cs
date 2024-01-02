@@ -12,7 +12,7 @@ using VacationManager.Infrastructure.Data;
 namespace VacationManager.Infrastructure.Migrations
 {
     [DbContext(typeof(VacationManagerDbContext))]
-    [Migration("20231219171304_Initial")]
+    [Migration("20231221163215_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -226,20 +226,26 @@ namespace VacationManager.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
-                    b.Property<int>("ApprovedRequests")
-                        .HasColumnType("int");
-
                     b.Property<int>("CurrentBalance")
-                        .HasColumnType("int");
-
-                    b.Property<int>("PendingRequests")
-                        .HasColumnType("int");
-
-                    b.Property<int>("RejectedRequests")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("ReportDate")
                         .HasColumnType("datetime2");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TotalApproved")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TotalDemand")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TotalPending")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TotalRejected")
+                        .HasColumnType("int");
 
                     b.Property<int>("UserId")
                         .HasColumnType("int");

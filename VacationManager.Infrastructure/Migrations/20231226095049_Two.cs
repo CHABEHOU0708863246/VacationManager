@@ -9,7 +9,7 @@ namespace VacationManager.Infrastructure.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AddColumn<int>(
-                name: "Status",
+                name: "TotalUsers",
                 table: "VacationsReports",
                 type: "int",
                 nullable: false,
@@ -19,7 +19,7 @@ namespace VacationManager.Infrastructure.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
-                name: "Status",
+                name: "TotalUsers",
                 table: "VacationsReports");
         }
     }

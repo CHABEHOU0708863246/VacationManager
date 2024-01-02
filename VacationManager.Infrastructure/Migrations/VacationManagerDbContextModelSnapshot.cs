@@ -245,6 +245,9 @@ namespace VacationManager.Infrastructure.Migrations
                     b.Property<int>("TotalRejected")
                         .HasColumnType("int");
 
+                    b.Property<int>("TotalUsers")
+                        .HasColumnType("int");
+
                     b.Property<int>("UserId")
                         .HasColumnType("int");
 

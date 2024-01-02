@@ -12,8 +12,8 @@ using VacationManager.Infrastructure.Data;
 namespace VacationManager.Infrastructure.Migrations
 {
     [DbContext(typeof(VacationManagerDbContext))]
-    [Migration("20231221114150_Three")]
-    partial class Three
+    [Migration("20231226095049_Two")]
+    partial class Two
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -245,6 +245,9 @@ namespace VacationManager.Infrastructure.Migrations
                         .HasColumnType("int");
 
                     b.Property<int>("TotalRejected")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TotalUsers")
                         .HasColumnType("int");
 
                     b.Property<int>("UserId")

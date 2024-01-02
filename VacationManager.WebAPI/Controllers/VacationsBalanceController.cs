@@ -148,7 +148,7 @@ namespace VacationManager.WebAPI.Controllers
         [SwaggerResponse(400, "Requête invalide.")]
         [SwaggerResponse(404, "La demande de congé spécifiée n'existe pas.")]
         [SwaggerResponse(500, "Une erreur serveur interne s'est produite.")]
-        public async Task<IActionResult> ApproveOrRejectVacation(int vacationId, string newStatus, CancellationToken cancellationToken)
+        public async Task<IActionResult> ApproveOrRejectVacation([FromRoute] int vacationId, string newStatus, CancellationToken cancellationToken)
         {
             try
             {
@@ -174,6 +174,7 @@ namespace VacationManager.WebAPI.Controllers
             }
         }
         #endregion
+
 
     }
 }
