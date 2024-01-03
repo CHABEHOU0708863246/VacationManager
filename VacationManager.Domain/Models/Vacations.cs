@@ -23,10 +23,8 @@ namespace VacationManager.Domain.Models
         {
             Attente,
             Approuve,
-            Rejete
+            Rejected
         }
     }
-
-
 
 }

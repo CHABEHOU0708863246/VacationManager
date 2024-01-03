@@ -63,6 +63,7 @@ namespace VacationManager.Domain.Services
                 StartDate = v.StartDate,
                 EndDate = v.EndDate,
                 Type = v.Type,
+                Status = v.Status,
                 Justification = v.Justification,
                 InitialBalance = _initialBalance,
                 UsedBalance = CalculateUsedVacationDaysWithHoliday(vacations, userId),
@@ -140,7 +141,7 @@ namespace VacationManager.Domain.Services
             {
                 UserId = userId,
                 StartDate = startDate,
-                EndDate = endDate
+                EndDate = endDate,
             };
 
             // Met à jour l'enregistrement de congés existant dans le dépôt.
@@ -206,36 +207,26 @@ namespace VacationManager.Domain.Services
         }
         #endregion
 
-        #region Cette méthode permet de valider ou de refuser les congés d'un utilisateur.
+        #region Cette méthode permet de valider ou de refuser les congés d'un utilisateur et effectuer la mise a jour.
         public async Task<bool> ApproveOrRejectVacationAsync(int vacationId, string newStatus, CancellationToken cancellationToken)
         {
-            var vacation = await _vacationsRepository.GetByIdAsync(vacationId, cancellationToken);
-
-            if (vacation == null)
+            try
             {
-                throw new ArgumentException("La demande de congé n'existe pas");
-            }
+                // Convertir la chaîne newStatus en énumération VacationsStatus
+                if (!Enum.TryParse(newStatus, out VacationsStatus status))
+                {
+                    throw new ArgumentException("Le statut n'est pas valide");
+                }
 
-            // Convertir la chaîne newStatus en énumération VacationsStatus
-            if (!Enum.TryParse(newStatus, out VacationsStatus status))
+                // Met à jour le statut de la demande de congé en utilisant le repository
+                return await _vacationsBalanceRepository.UpdateVacationStatusAsync(vacationId, status, cancellationToken);
+            }
+            catch (Exception ex)
             {
-                throw new ArgumentException("Le statut n'est pas valide");
+                // Gérer toute exception lors de la mise à jour
+                Console.WriteLine($"Erreur lors de la mise à jour du statut de la demande de congé : {ex.Message}");
+                return false;
             }
-
-            // Modifier le statut de la demande de congé uniquement si le statut est différent du statut actuel
-            if (vacation.Status != status)
-            {
-                vacation.Status = status;
-
-                // Enregistrer les modifications dans le dépôt
-                bool updateResult = await _vacationsRepository.UpdateAsync(vacation, cancellationToken);
-
-                // Retourner le résultat de la mise à jour
-                return updateResult;
-            }
-
-            // Retourner false si le statut est déjà défini sur le statut demandé
-            return false;
         }
         #endregion
 

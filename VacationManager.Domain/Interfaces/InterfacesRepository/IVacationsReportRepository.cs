@@ -12,5 +12,7 @@
         Task<int> GetTotalApprovedVacationsAsync(CancellationToken cancellationToken);
         Task<int> GetTotalRejectedVacationsAsync(CancellationToken cancellationToken);
         Task<int> GetTotalUsersAsync(CancellationToken cancellationToken);
+
+        // Récupère tous les rapports sur l'utilisation des congés pour un utilisateur spécifique
     }
 }

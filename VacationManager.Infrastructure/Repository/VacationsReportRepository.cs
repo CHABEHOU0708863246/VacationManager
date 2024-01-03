@@ -39,13 +39,17 @@ namespace VacationManager.Infrastructure.Repository
         public async Task<int> GetTotalRejectedVacationsAsync(CancellationToken cancellationToken)
         {
             return await _databaseContext.Vacations
-                .CountAsync(v => v.Status == Vacations.VacationsStatus.Rejete, cancellationToken);
+                .CountAsync(v => v.Status == Vacations.VacationsStatus.Rejected, cancellationToken);
         }
 
         public async Task<int> GetTotalUsersAsync(CancellationToken cancellationToken)
         {
             return await _databaseContext.Users.CountAsync(cancellationToken);
         }
+        #endregion
+
+        #region Récupère tous les rapports sur l'utilisation des congés pour un utilisateur spécifique
+
         #endregion
 
 

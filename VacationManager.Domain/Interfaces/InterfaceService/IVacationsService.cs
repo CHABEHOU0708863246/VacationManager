@@ -23,5 +23,8 @@ namespace VacationManager.Domain.Interfaces.InterfaceService
 
         // Cette méthode supprime un congé existant de la base de données.
         Task<bool> DeleteVacationsAsync(int id, CancellationToken cancellationToken);
+
+        // Cette méthode récupère tous les congés pour un utilisateur spécifique.
+        Task<IEnumerable<Vacations>> GetAllVacationsForUserAsync(int userId, CancellationToken cancellationToken);
     }
 }

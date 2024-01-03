@@ -136,31 +136,67 @@ namespace VacationManager.Infrastructure.Repository
             return existingBalance;
         }
         #endregion
-        #region Cette méthode permet de valider ou de refuser les congés d'un utilisateur et de mettre à jour cela depuis la base de donnée
-        public async Task<bool> ValidateOrRejectVacationAsync(int vacationId, CancellationToken cancellationToken)
+
+        #region Cette méthode permet de valider ou de refuser les congé en fonction de l'id de congés
+        public async Task<bool> ApproveOrRejectVacationAsync(int vacationId, CancellationToken cancellationToken, VacationsStatus newStatus)
         {
-            var vacation = await _databaseContext.Vacations.FirstOrDefaultAsync(v => v.Id == vacationId, cancellationToken);
+            bool success = true;
 
-            if (vacation == null)
+            try
             {
-                throw new ArgumentException("La demande de congé n'existe pas");
+                var vacation = await _databaseContext.Vacations.FirstOrDefaultAsync(v => v.Id == vacationId, cancellationToken);
+
+                if (vacation == null)
+                {
+                    throw new ArgumentException("La demande de congé n'existe pas");
+                }
+
+                vacation.Status = newStatus;
+
+                await _databaseContext.SaveChangesAsync(cancellationToken);
+            }
+            catch (Exception e)
+            {
+                success = false;
+                Console.WriteLine(e.Message);
             }
 
-            if ((vacation.EndDate - vacation.StartDate).Days > 10)
-            {
-                vacation.Status = VacationsStatus.Approuve;
-            }
-            else
-            {
-                vacation.Status = VacationsStatus.Rejete;
-            }
-
-            await _databaseContext.SaveChangesAsync(cancellationToken);
-
-            return true;
+            return success;
         }
         #endregion
 
+        #region Vérifie si une demande de congé spécifique existe.
+        public async Task<bool> CheckVacationExistsAsync(int vacationId, CancellationToken cancellationToken)
+        {
+            var vacation = await _databaseContext.Vacations.FirstOrDefaultAsync(v => v.Id == vacationId, cancellationToken);
+            return vacation != null;
+        }
+        #endregion
+
+        #region Met a jour directement le status de congé valider ou refuser
+        public async Task<bool> UpdateVacationStatusAsync(int vacationId, Vacations.VacationsStatus newStatus, CancellationToken cancellationToken)
+        {
+            try
+            {
+                var vacation = await _databaseContext.Vacations.FirstOrDefaultAsync(v => v.Id == vacationId, cancellationToken);
+
+                if (vacation == null)
+                {
+                    throw new ArgumentException("La demande de congé n'existe pas");
+                }
+
+                vacation.Status = newStatus;
+
+                await _databaseContext.SaveChangesAsync(cancellationToken);
+                return true;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                return false;
+            }
+        }
+        #endregion
 
     }
 }

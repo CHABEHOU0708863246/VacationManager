@@ -152,7 +152,7 @@ namespace VacationManager.WebAPI.Controllers
         {
             try
             {
-                // Appel de votre service pour valider ou rejeter la demande de congé
+                // Utilisation de la méthode mise à jour du service
                 var updated = await _vacationsBalanceService.ApproveOrRejectVacationAsync(vacationId, newStatus, cancellationToken);
 
                 if (updated)

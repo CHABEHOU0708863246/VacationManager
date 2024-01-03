@@ -40,12 +40,36 @@ namespace VacationManager.Domain.Services
 
             // Récupérer le nombre total de congés refusés
             statistics.TotalRejected = (await _vacationsService.GetAllVacationsAsync(cancellationToken))
-                .Count(v => v.Status == Vacations.VacationsStatus.Rejete);
+                .Count(v => v.Status == Vacations.VacationsStatus.Rejected);
 
             // Récupérer le nombre total d'utilisateurs
             statistics.TotalUsers = (await _usersService.GetAllUsersAsync(cancellationToken)).Count();
 
             return statistics;
+        }
+        #endregion
+
+        #region Récupère tous les rapports sur l'utilisation des congés pour un utilisateur specifique ou l'utilisateur connecté
+        public async Task<VacationsReport> GetVacationsStatisticsForUserAsync(int userId, CancellationToken cancellationToken)
+        {
+            var statisticsForUser = new VacationsReport();
+
+            // Récupérer le nombre total de congés pour l'utilisateur spécifié
+            statisticsForUser.TotalDemand = (await _vacationsService.GetAllVacationsForUserAsync(userId, cancellationToken)).Count();
+
+            // Récupérer le nombre total de congés en attente pour l'utilisateur spécifié
+            statisticsForUser.TotalPending = (await _vacationsService.GetAllVacationsForUserAsync(userId, cancellationToken))
+                .Count(v => v.Status == Vacations.VacationsStatus.Attente);
+
+            // Récupérer le nombre total de congés approuvés pour l'utilisateur spécifié
+            statisticsForUser.TotalApproved = (await _vacationsService.GetAllVacationsForUserAsync(userId, cancellationToken))
+                .Count(v => v.Status == Vacations.VacationsStatus.Approuve);
+
+            // Récupérer le nombre total de congés refusés pour l'utilisateur spécifié
+            statisticsForUser.TotalRejected = (await _vacationsService.GetAllVacationsForUserAsync(userId, cancellationToken))
+                .Count(v => v.Status == Vacations.VacationsStatus.Rejected);
+
+            return statisticsForUser;
         }
         #endregion
 

@@ -10,5 +10,8 @@ namespace VacationManager.Domain.Interfaces.InterfaceService
 
         // Récupère tous les rapports sur l'utilisation des congés
         Task<VacationsReport> GetAllVacationsStatisticsAsync(CancellationToken cancellationToken);
+
+        // Récupère tous les rapports sur l'utilisation des congés pour un utilisateur specifique ou l'utilisateur connecté
+        Task<VacationsReport> GetVacationsStatisticsForUserAsync(int userId, CancellationToken cancellationToken);
     }
 }
