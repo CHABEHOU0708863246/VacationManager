@@ -12,8 +12,8 @@ using VacationManager.Infrastructure.Data;
 namespace VacationManager.Infrastructure.Migrations
 {
     [DbContext(typeof(VacationManagerDbContext))]
-    [Migration("20231226095049_Two")]
-    partial class Two
+    [Migration("20240107150950_Initial")]
+    partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {

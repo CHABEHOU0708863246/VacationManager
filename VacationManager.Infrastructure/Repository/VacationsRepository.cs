@@ -27,7 +27,6 @@ namespace VacationManager.Infrastructure.Repository
         {
             return await _databaseContext.Vacations
                 .Include(v => v.Users)
-                .Where(v => v.UserId == v.UserId)
                 .ToListAsync(cancellationToken);
         }
 
@@ -97,7 +96,7 @@ namespace VacationManager.Infrastructure.Repository
         public async Task<IEnumerable<Vacations>> GetVacationsByStatusAsync(VacationsStatus status, CancellationToken cancellationToken)
         {
             var query = _databaseContext.Vacations
-                .Where(vacation => vacation.Status == VacationsStatus.Attente);
+                .Where(vacation => vacation.Status == status);
 
             return await query.ToListAsync(cancellationToken);
         }
@@ -106,12 +105,10 @@ namespace VacationManager.Infrastructure.Repository
         #region Retourne un congé de manière spécifique en utilisant l'id de l'utilisateur avec des filtres et retourne une liste
         public async Task<IEnumerable<Vacations>> GetVacationsWithUsersByUserIdAsync(int userId, CancellationToken cancellationToken)
         {
-
-            var vacationsWithUsers = _databaseContext.Vacations
-                .Where(v => v.UserId == userId)
-                .ToList();
-
-            return vacationsWithUsers;
+            return await _databaseContext.Vacations
+              .Include(v => v.Users)
+              .Where(v => v.UserId == userId)
+              .ToListAsync(cancellationToken);
         }
         #endregion
 

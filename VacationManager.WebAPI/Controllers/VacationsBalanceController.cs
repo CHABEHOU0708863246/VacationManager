@@ -2,6 +2,7 @@
 using Swashbuckle.AspNetCore.Annotations;
 using VacationManager.Domain.DTO;
 using VacationManager.Domain.Interfaces.InterfaceService;
+using VacationManager.Domain.Models;
 
 namespace VacationManager.WebAPI.Controllers
 {
@@ -95,29 +96,12 @@ namespace VacationManager.WebAPI.Controllers
         {
             try
             {
-                // Récupère le solde de congés actuel de l'utilisateur.
-                var vacationBalance = await _vacationsBalanceService.GetVacationBalanceByUserIdAsync(userId, cancellationToken);
-
-                // Si le solde de congés n'existe pas, renvoie une réponse avec le code d'état 404.
-                if (vacationBalance == null)
-                {
-                    return NotFound("Le solde de congés de l'utilisateur spécifié n'existe pas.");
-                }
-
-                // Calcule la durée du congé demandé.
-                int vacationDuration = (endDate - startDate).Days;
-
-                // Met à jour le solde de congés de l'utilisateur.
-                vacationBalance.UsedVacationBalance += vacationDuration;
-                vacationBalance.RemainingVacationBalance -= vacationDuration;
-
-                // Met à jour le solde de congés dans la base de données.
+                // Utilisation du service pour mettre à jour le solde de congés
                 var updated = await _vacationsBalanceService.UpdateVacationBalanceAsync(userId, startDate, endDate, cancellationToken);
 
-                // Si la mise à jour a réussi, renvoie une réponse avec le code d'état 200.
                 if (updated)
                 {
-                    return Ok();
+                    return Ok("Mise à jour de la balance de congés effectuée avec succès.");
                 }
                 else
                 {
@@ -148,11 +132,10 @@ namespace VacationManager.WebAPI.Controllers
         [SwaggerResponse(400, "Requête invalide.")]
         [SwaggerResponse(404, "La demande de congé spécifiée n'existe pas.")]
         [SwaggerResponse(500, "Une erreur serveur interne s'est produite.")]
-        public async Task<IActionResult> ApproveOrRejectVacation([FromRoute] int vacationId, string newStatus, CancellationToken cancellationToken)
+        public async Task<IActionResult> ApproveOrRejectVacation([FromRoute] int vacationId, Vacations.VacationsStatus newStatus, CancellationToken cancellationToken)
         {
             try
             {
-                // Utilisation de la méthode mise à jour du service
                 var updated = await _vacationsBalanceService.ApproveOrRejectVacationAsync(vacationId, newStatus, cancellationToken);
 
                 if (updated)
@@ -162,6 +145,44 @@ namespace VacationManager.WebAPI.Controllers
                 else
                 {
                     return StatusCode(500, "La mise à jour du statut de la demande de congé a échoué.");
+                }
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest($"Paramètre invalide : {ex.Message}");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Une erreur s'est produite : {ex.Message}");
+            }
+        }
+        #endregion
+
+        #region Endpoint pour supprimer le solde de congés d'un utilisateur spécifique
+        /// <summary>
+        /// Supprime le solde de congés de l'utilisateur spécifié.
+        /// </summary>
+        /// <param name="userId">ID de l'utilisateur pour lequel le solde de congés doit être supprimé.</param>
+        /// <param name="cancellationToken"></param>
+        /// <returns>Retourne un résultat indiquant si la suppression a été effectuée avec succès.</returns>
+        [HttpDelete("{userId}")]
+        [SwaggerResponse(200, "Suppression du solde de congés effectuée avec succès.")]
+        [SwaggerResponse(400, "Requête invalide.")]
+        [SwaggerResponse(500, "La suppression du solde de congés a échoué.")]
+        public async Task<IActionResult> DeleteVacationBalanceByUserId(int userId, CancellationToken cancellationToken)
+        {
+            try
+            {
+                // Utilisation du service pour supprimer le solde de congés de l'utilisateur spécifié
+                var deleted = await _vacationsBalanceService.DeleteVacationBalanceByUsersIdAsync(userId, cancellationToken);
+
+                if (deleted)
+                {
+                    return Ok("Suppression du solde de congés effectuée avec succès.");
+                }
+                else
+                {
+                    return StatusCode(500, "La suppression du solde de congés a échoué.");
                 }
             }
             catch (ArgumentException ex)

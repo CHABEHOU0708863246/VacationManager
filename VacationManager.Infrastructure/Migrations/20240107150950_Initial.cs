@@ -117,7 +117,8 @@ namespace VacationManager.Infrastructure.Migrations
                     TotalRejected = table.Column<int>(type: "int", nullable: false),
                     CurrentBalance = table.Column<int>(type: "int", nullable: false),
                     Status = table.Column<int>(type: "int", nullable: false),
-                    ReportDate = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    ReportDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    TotalUsers = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {

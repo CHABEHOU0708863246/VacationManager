@@ -15,6 +15,7 @@ namespace VacationManager.Domain.Services
         private readonly IUsersRepository _usersRepository;
         private readonly IVacationsBalanceRepository _vacationsBalanceRepository;
         private readonly List<DateTime> _holidays;
+        private SemaphoreSlim semaphore = new SemaphoreSlim(1, 1);
 
         public VacationsBalanceService(IVacationsRepository vacationsRepository, IUsersRepository usersRepository, IOptions<VacationOptions> options, IVacationsBalanceRepository vacationsBalanceRepository, List<DateTime> holidays)
         {
@@ -32,7 +33,18 @@ namespace VacationManager.Domain.Services
             var users = await _usersRepository.GetAllAsync(cancellationToken);
 
             // Transforme la liste d'utilisateurs en une liste de tâches de récupération des détails de vacances
-            var vacationDetailsTasks = users.Select(user => GetVacationDetailsByUserIdAsync(user.Id, cancellationToken));
+            var vacationDetailsTasks = users.Select(async user =>
+            {
+                await semaphore.WaitAsync(cancellationToken);
+                try
+                {
+                    return await GetVacationDetailsByUserIdAsync(user.Id, cancellationToken);
+                }
+                finally
+                {
+                    semaphore.Release();
+                }
+            });
 
             // Attend que toutes les tâches de récupération des détails de vacances soient terminées
             var vacationDetails = await Task.WhenAll(vacationDetailsTasks);
@@ -144,10 +156,10 @@ namespace VacationManager.Domain.Services
                 EndDate = endDate,
             };
 
-            // Met à jour l'enregistrement de congés existant dans le dépôt.
-            bool updateResult = await _vacationsRepository.UpdateAsync(vacations, cancellationToken);
+            // Met à jour le solde de congés dans le repository des soldes de congés après la mise à jour
+            bool updateResult = await _vacationsBalanceRepository.UpdateAsync(userId, startDate, endDate, cancellationToken);
 
-            // Renvoie le résultat de la mise à jour.
+            // Renvoie le résultat de la mise à jour
             return updateResult;
         }
         #endregion
@@ -208,23 +220,92 @@ namespace VacationManager.Domain.Services
         #endregion
 
         #region Cette méthode permet de valider ou de refuser les congés d'un utilisateur et effectuer la mise a jour.
-        public async Task<bool> ApproveOrRejectVacationAsync(int vacationId, string newStatus, CancellationToken cancellationToken)
+        public async Task<bool> ApproveOrRejectVacationAsync(int vacationId, Vacations.VacationsStatus newStatus, CancellationToken cancellationToken)
         {
             try
             {
-                // Convertir la chaîne newStatus en énumération VacationsStatus
-                if (!Enum.TryParse(newStatus, out VacationsStatus status))
+                // Vérifie si le statut est valide
+                if (!Enum.TryParse(newStatus.ToString(), out VacationsStatus status))
                 {
                     throw new ArgumentException("Le statut n'est pas valide");
                 }
 
                 // Met à jour le statut de la demande de congé en utilisant le repository
-                return await _vacationsBalanceRepository.UpdateVacationStatusAsync(vacationId, status, cancellationToken);
+                bool updateStatusResult = await _vacationsBalanceRepository.UpdateVacationStatusAsync(vacationId, status, cancellationToken);
+
+                if (updateStatusResult)
+                {
+                    if (status == VacationsStatus.Approuve || status == VacationsStatus.Rejected)
+                    {
+                        // Récupère la demande de congé associée à l'ID
+                        var vacation = await _vacationsRepository.GetByIdAsync(vacationId, cancellationToken);
+
+                        if (vacation != null)
+                        {
+                            // Obtient les détails de congé de l'utilisateur concerné
+                            var userVacationDetails = await GetVacationDetailsByUserIdAsync(vacation.UserId, cancellationToken);
+
+                            // Récupère le solde de congés actuel de l'utilisateur
+                            var vacationBalance = await GetVacationBalanceByUserIdAsync(vacation.UserId, cancellationToken);
+
+                            if (status == VacationsStatus.Approuve)
+                            {
+                                int usedVacationDays = userVacationDetails.Sum(v => v.UsedBalance);
+                                vacationBalance.UsedVacationBalance = usedVacationDays;
+                                vacationBalance.RemainingVacationBalance = vacationBalance.InitialVacationBalance - usedVacationDays;
+                            }
+                            else if (status == VacationsStatus.Rejected)
+                            {
+                                // Si le statut est rejeté, réinitialise le solde de congés à l'équilibre initial
+                                vacationBalance.RemainingVacationBalance = vacationBalance.InitialVacationBalance;
+                                vacationBalance.UsedVacationBalance = 0;
+                            }
+
+                            // Met à jour le solde de congés dans le repository des soldes de congés après la mise à jour du statut
+                            bool updateBalanceResult = await _vacationsBalanceRepository.UpdateAsync(vacation.UserId, vacation.StartDate, vacation.EndDate, cancellationToken);
+
+                            return updateBalanceResult;
+                        }
+                        else
+                        {
+                            throw new ArgumentException("La demande de congé spécifiée n'existe pas.");
+                        }
+                    }
+                    else
+                    {
+                        throw new ArgumentException("Le statut n'est pas valide pour la mise à jour du solde de congés.");
+                    }
+                }
+                else
+                {
+                    return false;
+                }
             }
             catch (Exception ex)
             {
-                // Gérer toute exception lors de la mise à jour
                 Console.WriteLine($"Erreur lors de la mise à jour du statut de la demande de congé : {ex.Message}");
+                return false;
+            }
+        }
+
+
+        #endregion
+
+        #region Cette methode supprime un solde de congé en fonction de l'utilisateur
+        public async Task<bool> DeleteVacationBalanceByUsersIdAsync(int userId, CancellationToken cancellationToken)
+        {
+            try
+            {
+                // Appeler la méthode pour supprimer le solde de congés de l'utilisateur spécifié
+                bool deletionResult = await _vacationsBalanceRepository.DeleteVacationBalanceAsync(userId, cancellationToken);
+
+                // Renvoyer le résultat de la suppression
+                return deletionResult;
+            }
+            catch (Exception ex)
+            {
+                // Gérer l'exception selon vos besoins
+                Console.WriteLine($"Erreur lors de la suppression du solde de congés : {ex.Message}");
                 return false;
             }
         }

@@ -20,5 +20,11 @@ namespace VacationManager.Domain.Interfaces.InterfacesRepository
         // Cette méthode permet de mettre à jour le statut d'une demande de congé spécifique pour un utilisateur.
         Task<bool> UpdateVacationStatusAsync(int vacationId, Vacations.VacationsStatus newStatus, CancellationToken cancellationToken);
 
+        // Cette methode gere le calcul du solde de congé en fontion du status
+        Task<bool> UpdateBalanceByVacationStatusAsync(int userId, Vacations.VacationsStatus status, CancellationToken cancellationToken);
+
+        // Supprime un solde de congés en fonction de l'id de lutilisateur
+        Task<bool> DeleteVacationBalanceAsync(int userId, CancellationToken cancellationToken);
+
     }
 }

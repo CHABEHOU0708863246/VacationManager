@@ -64,5 +64,6 @@ namespace VacationManager.Domain.Services.Authentification
 
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
+
     }
 }

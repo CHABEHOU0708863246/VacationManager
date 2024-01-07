@@ -98,8 +98,6 @@ namespace VacationManager.Domain.Services
         #region Implémentation pour récupérer les congés pour un utilisateur spécifique
         public async Task<IEnumerable<Vacations>> GetAllVacationsForUserAsync(int userId, CancellationToken cancellationToken)
         {
-            // Implémentation pour récupérer les congés pour un utilisateur spécifique
-            // Utilise le _vacationsRepository ou toute autre logique nécessaire
             return await _vacationsRepository.GetVacationsWithUsersByUserIdAsync(userId, cancellationToken);
         }
         #endregion

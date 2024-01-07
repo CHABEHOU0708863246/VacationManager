@@ -18,6 +18,9 @@ namespace VacationManager.Domain.Interfaces.InterfaceService
         Task<IEnumerable<VacationDetailsDTO>> GetAllVacationDetailsAsync(CancellationToken cancellationToken);
 
         // Cette méthode permet de valider ou de refuser les congés d'un utilisateur.
-        Task<bool> ApproveOrRejectVacationAsync(int vacationId, string newStatus, CancellationToken cancellationToken);
+        Task<bool> ApproveOrRejectVacationAsync(int vacationId, Vacations.VacationsStatus newStatus, CancellationToken cancellationToken);
+
+        // Supprime un solde de congés en fonction de l'id de lutilisateur
+        Task<bool> DeleteVacationBalanceByUsersIdAsync(int userId, CancellationToken cancellationToken);
     }
 }
