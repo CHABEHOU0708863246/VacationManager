@@ -28,5 +28,6 @@ namespace VacationManager.Domain.Interfaces.InterfaceService
 
         // Récupère un utilisateur par son adresse e-mail
         Task<Users> GetUserByEmailAsync(string email, CancellationToken cancellationToken);
+
     }
 }

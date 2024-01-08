@@ -196,6 +196,60 @@ namespace VacationManager.WebAPI.Controllers
         }
         #endregion
 
+        #region Endpoint pour ajouter un solde de congés pour une nouvelle année
+        /// <summary>
+        /// Ajoute un solde de congés pour une nouvelle année.
+        /// </summary>
+        /// <param name="balance">Solde de congés à ajouter.</param>
+        /// <param name="cancellationToken"></param>
+        /// <returns>Retourne un résultat indiquant si l'ajout a été effectué avec succès.</returns>
+        [HttpPost("add")]
+        [SwaggerResponse(200, "Ajout du solde de congés effectué avec succès.", typeof(VacationsBalanceDTO))]
+        [SwaggerResponse(400, "Requête invalide.")]
+        [SwaggerResponse(500, "L'ajout du solde de congés a échoué.")]
+        public async Task<IActionResult> AddVacationBalance([FromBody] VacationsBalanceDTO balance, CancellationToken cancellationToken)
+        {
+            try
+            {
+                // Mapping de VacationsBalanceDTO à VacationsBalance
+                var vacationsBalance = MapToVacationsBalance(balance);
+
+                static VacationsBalance MapToVacationsBalance(VacationsBalanceDTO balanceDTO)
+                {
+                    return new VacationsBalance
+                    {
+                        Id = balanceDTO.Id,
+                        UserId = balanceDTO.UserId,
+                        InitialVacationBalance = balanceDTO.InitialVacationBalance,
+                        UsedVacationBalance = balanceDTO.UsedVacationBalance,
+                        RemainingVacationBalance = balanceDTO.RemainingVacationBalance
+                    };
+                }
+
+                // Utilisation du service pour ajouter un solde de congés pour une nouvelle année
+                var added = await _vacationsBalanceService.AddVacationBalanceAsync(vacationsBalance, cancellationToken);
+
+                if (added)
+                {
+                    return Ok("Ajout du solde de congés effectué avec succès.");
+                }
+                else
+                {
+                    return StatusCode(500, "L'ajout du solde de congés a échoué.");
+                }
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest($"Paramètre invalide : {ex.Message}");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Une erreur s'est produite : {ex.Message}");
+            }
+        }
+
+        #endregion
+
 
     }
 }

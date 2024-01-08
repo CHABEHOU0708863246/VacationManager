@@ -89,6 +89,7 @@ namespace VacationManager.Infrastructure.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     UserId = table.Column<int>(type: "int", nullable: false),
+                    Year = table.Column<int>(type: "int", nullable: false),
                     InitialVacationBalance = table.Column<int>(type: "int", nullable: false),
                     UsedVacationBalance = table.Column<int>(type: "int", nullable: false),
                     RemainingVacationBalance = table.Column<int>(type: "int", nullable: false)

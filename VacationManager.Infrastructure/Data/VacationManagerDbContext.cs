@@ -24,7 +24,7 @@ namespace VacationManager.Infrastructure.Data
         #region Configuration de la connexion à la base de données
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlServer("Server=DELL-LATIDUDEE7;Database=VacationManagerDb;Trusted_Connection=True; Encrypt=False;");
+            optionsBuilder.UseSqlServer("Server=DESKTOP-S6IUL98;Database=VacationManagerDb;Trusted_Connection=True; Encrypt=False;");
         }
         #endregion
 

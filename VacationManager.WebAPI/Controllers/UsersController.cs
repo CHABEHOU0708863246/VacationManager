@@ -1,8 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 using VacationManager.Domain.DTO;
+using VacationManager.Domain.DTO.ResetPassword;
 using VacationManager.Domain.Interfaces.InterfaceService;
 using VacationManager.Domain.Models;
+using VacationManager.Domain.Services;
 using VacationManager.Domain.Tools;
 
 namespace VacationManager.WebAPI.Controllers
@@ -295,6 +297,7 @@ namespace VacationManager.WebAPI.Controllers
             }
         }
         #endregion
+
 
     }
 }

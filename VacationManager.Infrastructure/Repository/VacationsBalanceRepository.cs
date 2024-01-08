@@ -29,7 +29,7 @@ namespace VacationManager.Infrastructure.Repository
         #endregion
 
         #region Logique pour récupérer le solde de congé par l'ID de l'utilisateur depuis la base de données
-        public async Task<VacationsBalance> GetByUserIdAsync(int userId, CancellationToken cancellationToken)
+        public async Task<VacationsBalance> GetByUserIdAsync(int userId,CancellationToken cancellationToken)
         {
             var existingBalance = await _databaseContext.VacationsBalances.FirstOrDefaultAsync(vb => vb.UserId == userId, cancellationToken);
 
@@ -42,18 +42,6 @@ namespace VacationManager.Infrastructure.Repository
         {
             try
             {
-                var existingBalance = await GetByUserIdAsync(userId, cancellationToken);
-
-                if (existingBalance == null)
-                {
-                    existingBalance = new VacationsBalance
-                    {
-                        UserId = userId,
-                        InitialVacationBalance = 23
-                    };
-                    _databaseContext.VacationsBalances.Add(existingBalance);
-                }
-
                 if (userId <= 0)
                 {
                     throw new ArgumentException("L'ID de l'utilisateur doit être supérieur ou égal à 0.", nameof(userId));
@@ -64,17 +52,53 @@ namespace VacationManager.Infrastructure.Repository
                     throw new ArgumentException("La date de début doit être antérieure ou égale à la date de fin.", nameof(startDate));
                 }
 
-                var userIds = await _usersRepository.GetAllAsync(cancellationToken);
-                var userIdsList = userIds.Select(u => u.Id).ToList();
+                var existingBalance = await GetByUserIdAsync(userId, cancellationToken);
 
-                var vacationDetails = await _databaseContext.VacationsBalances
-                  .Where(v => userIdsList.Contains(v.UserId))
-                  .ToListAsync(cancellationToken);
+                if (existingBalance == null)
+                {
+                    existingBalance = new VacationsBalance
+                    {
+                        UserId = userId,
+                        InitialVacationBalance = 23,
+                        Year = DateTime.Now.Year
+                    };
+                    _databaseContext.VacationsBalances.Add(existingBalance);
+                }
 
-                int usedVacationDays = CalculateUsedVacationDays(vacationDetails.Cast<Vacations>());
+                int usedDays = (endDate - startDate).Days + 1;
 
-                existingBalance.UsedVacationBalance = usedVacationDays;
-                existingBalance.RemainingVacationBalance = existingBalance.InitialVacationBalance - usedVacationDays;
+                // Vérifiez si les vacances s’étendent sur plusieurs années
+                if (startDate.Year != endDate.Year)
+                {
+                    // Calculer les jours pour l’année en cours
+                    DateTime endOfYear = new DateTime(startDate.Year, 12, 31);
+                    int daysThisYear = (endOfYear - startDate).Days + 1;
+
+                    // Calculer les jours pour l’année suivante
+                    DateTime startOfNextYear = new DateTime(endDate.Year, 1, 1);
+                    int daysNextYear = (endDate - startOfNextYear).Days + 1;
+
+                    // Mettre à jour le solde de l’exercice en cours
+                    existingBalance.RemainingVacationBalance -= daysThisYear;
+
+                    // Créer ou récupérer le solde de l’année prochaine
+                    var nextYearBalance = await GetByUserIdAsync(userId, cancellationToken);
+                    if (nextYearBalance == null)
+                    {
+                        nextYearBalance = new VacationsBalance
+                        {
+                            UserId = userId,
+                            Year = endDate.Year,
+                            InitialVacationBalance = 23
+                        };
+                        _databaseContext.VacationsBalances.Add(nextYearBalance);
+                    }
+                    nextYearBalance.RemainingVacationBalance += daysNextYear;
+                }
+                else
+                {
+                    existingBalance.RemainingVacationBalance -= usedDays;
+                }
 
                 await _databaseContext.SaveChangesAsync(cancellationToken);
 
@@ -85,13 +109,24 @@ namespace VacationManager.Infrastructure.Repository
                 return false;
             }
         }
+
         #endregion
 
         #region Effectue le calcul du nombre de jours de congé utilisés en fonction d'une collection de congés spécifique.
         private int CalculateUsedVacationDays(IEnumerable<Vacations> vacations)
         {
-            return vacations.Sum(v => (v.EndDate - v.StartDate).Days + 1);
+            int totalUsedDays = 0;
+
+            foreach (var vacation in vacations)
+            {
+                // Check if vacation spans across multiple years
+                int days = (vacation.EndDate - vacation.StartDate).Days + 1;
+                totalUsedDays += days;
+            }
+
+            return totalUsedDays;
         }
+
         #endregion
 
         #region Donne les details de congé en fonction de l'id de l'utilisateur ou employee
@@ -107,43 +142,51 @@ namespace VacationManager.Infrastructure.Repository
                 return Enumerable.Empty<VacationDetailsDTO>();
             }
 
-            var firstVacation = vacations.FirstOrDefault();
-            var vacationBalance = await _databaseContext.VacationsBalances.FirstOrDefaultAsync(vb => vb.UserId == userId, cancellationToken);
+            var vacationBalance = await GetByUserIdAsync(userId, cancellationToken);
 
-            if (vacationBalance == null)
+            List<VacationDetailsDTO> vacationDetailsList = new List<VacationDetailsDTO>();
+
+            foreach (var vacation in vacations)
             {
-                // Gestion si le solde n'existe pas pour cet utilisateur
-                return Enumerable.Empty<VacationDetailsDTO>();
+                int usedVacationDays = (vacation.EndDate - vacation.StartDate).Days + 1;
+
+                var vacationDetailsDTO = new VacationDetailsDTO
+                {
+                    UserId = userId,
+                    UserName = $"{vacation.Users.FirstName} {vacation.Users.LastName}",
+                    StartDate = vacation.StartDate,
+                    EndDate = vacation.EndDate,
+                    Type = vacation.Type,
+                    Justification = vacation.Justification,
+                    InitialBalance = vacationBalance.InitialVacationBalance,
+                    UsedBalance = usedVacationDays,
+                    RemainingBalance = vacationBalance.InitialVacationBalance - usedVacationDays,
+                };
+
+                vacationDetailsList.Add(vacationDetailsDTO);
             }
 
-            int usedVacationDays = CalculateUsedVacationDays(vacations.Cast<Vacations>());
-
-            var vacationDetailsDTO = new VacationDetailsDTO
-            {
-                UserId = userId,
-                UserName = $"{firstVacation.Users.FirstName} {firstVacation.Users.LastName}",
-                StartDate = firstVacation.StartDate,
-                EndDate = firstVacation.EndDate,
-                Type = firstVacation.Type,
-                Justification = firstVacation.Justification,
-                InitialBalance = vacationBalance.InitialVacationBalance,
-                UsedBalance = usedVacationDays,
-                RemainingBalance = vacationBalance.InitialVacationBalance - usedVacationDays,
-            };
-
-            return new List<VacationDetailsDTO>() { vacationDetailsDTO };
+            return vacationDetailsList;
         }
-
         #endregion
 
         #region Calcul du solde restant
         public async Task<VacationsBalance> CalculateRemainingBalance(int userId, CancellationToken cancellationToken)
         {
             var existingBalance = await GetByUserIdAsync(userId, cancellationToken);
-            existingBalance.RemainingVacationBalance = existingBalance.InitialVacationBalance - existingBalance.UsedVacationBalance;
+
+            var vacations = await _databaseContext.Vacations
+                .Where(v => v.UserId == userId)
+                .ToListAsync(cancellationToken);
+
+            int usedVacationDays = CalculateUsedVacationDays(vacations);
+
+            existingBalance.UsedVacationBalance = usedVacationDays;
+            existingBalance.RemainingVacationBalance = existingBalance.InitialVacationBalance - usedVacationDays;
 
             return existingBalance;
         }
+
         #endregion
 
         #region Cette méthode permet de valider ou de refuser les congé en fonction de l'id de congés si le status du congé est en attente ou acceptre le solde initial est calcule mais si le statut est refusée alors le solde initial revien à 23
@@ -158,17 +201,11 @@ namespace VacationManager.Infrastructure.Repository
                     throw new ArgumentException("La demande de congé n'existe pas");
                 }
 
-                var existingBalance = await GetByUserIdAsync(vacation.UserId, cancellationToken);
-
-                if (existingBalance == null)
+                var existingBalance = await GetByUserIdAsync(vacation.UserId, cancellationToken) ?? new VacationsBalance
                 {
-                    existingBalance = new VacationsBalance
-                    {
-                        UserId = vacation.UserId,
-                        InitialVacationBalance = 23 // Solde initial par défaut
-                    };
-                    _databaseContext.VacationsBalances.Add(existingBalance);
-                }
+                    UserId = vacation.UserId,
+                    InitialVacationBalance = 23 // Solde initial par défaut
+                };
 
                 // Mettre à jour le solde en fonction du nouveau statut
                 switch (newStatus)
@@ -219,17 +256,11 @@ namespace VacationManager.Infrastructure.Repository
                     throw new ArgumentException("La demande de congé n'existe pas");
                 }
 
-                var existingBalance = await GetByUserIdAsync(vacation.UserId, cancellationToken);
-
-                if (existingBalance == null)
+                var existingBalance = await GetByUserIdAsync(vacation.UserId, cancellationToken) ?? new VacationsBalance
                 {
-                    existingBalance = new VacationsBalance
-                    {
-                        UserId = vacation.UserId,
-                        InitialVacationBalance = 23 // Solde initial par défaut
-                    };
-                    _databaseContext.VacationsBalances.Add(existingBalance);
-                }
+                    UserId = vacation.UserId,
+                    InitialVacationBalance = 23 // Solde initial par défaut
+                };
 
                 if (newStatus == VacationsStatus.Approuve || newStatus == VacationsStatus.Attente)
                 {
@@ -253,37 +284,45 @@ namespace VacationManager.Infrastructure.Repository
                 return false;
             }
         }
+
         #endregion
 
         #region Gere le calcul du solde de congé en fonction du status du congé
         public async Task<bool> UpdateBalanceByVacationStatusAsync(int userId, Vacations.VacationsStatus status, CancellationToken cancellationToken)
         {
-            var balance = await _databaseContext.VacationsBalances.FirstOrDefaultAsync(vb => vb.UserId == userId);
-
-            if (balance == null)
+            try
             {
-                // Gérer le cas où le solde de congé pour cet utilisateur n'existe pas encore
-                return false;
-            }
+                var balance = await _databaseContext.VacationsBalances.FirstOrDefaultAsync(vb => vb.UserId == userId);
 
-            // Mise à jour du solde en fonction du statut du congé
-            switch (status)
+                if (balance == null)
+                {
+                    return false; // Gérer le cas où le solde de congé pour cet utilisateur n'existe pas encore
+                }
+
+                // Mise à jour du solde en fonction du statut du congé
+                switch (status)
+                {
+                    case Vacations.VacationsStatus.Attente:
+                    case Vacations.VacationsStatus.Approuve:
+                        balance.RemainingVacationBalance = balance.InitialVacationBalance - balance.UsedVacationBalance;
+                        break;
+                    case Vacations.VacationsStatus.Rejected:
+                        balance.RemainingVacationBalance = 0; // Réinitialisation du solde à zéro
+                        break;
+                    default:
+                        // Traitez d'autres cas de statut si nécessaire
+                        break;
+                }
+
+                // Sauvegarde des changements dans la base de données
+                await _databaseContext.SaveChangesAsync(cancellationToken);
+                return true;
+            }
+            catch (Exception ex)
             {
-                case Vacations.VacationsStatus.Attente:
-                case Vacations.VacationsStatus.Approuve:
-                    balance.RemainingVacationBalance = balance.InitialVacationBalance - balance.UsedVacationBalance;
-                    break;
-                case Vacations.VacationsStatus.Rejected:
-                    balance.RemainingVacationBalance = 0; // Réinitialisation du solde à zéro
-                    break;
-                default:
-                    // Traitez d'autres cas de statut si nécessaire
-                    break;
+                Console.WriteLine($"Erreur lors de la mise à jour du solde de congés : {ex.Message}");
+                throw;
             }
-
-            // Sauvegarde des changements dans la base de données
-            await _databaseContext.SaveChangesAsync(cancellationToken);
-            return true;
         }
         #endregion
 
@@ -305,18 +344,32 @@ namespace VacationManager.Infrastructure.Repository
             }
             catch (DbUpdateException ex)
             {
-                // Capturer et gérer spécifiquement les exceptions liées à la base de données
                 Console.WriteLine($"Erreur lors de la suppression du solde de congés : {ex.Message}");
-                throw; // Vous pouvez choisir de relancer l'exception ici ou renvoyer false pour signaler un échec
+                throw; // Gérer spécifiquement les exceptions liées à la base de données
             }
             catch (Exception ex)
             {
-                // Capturer toutes les autres exceptions inattendues
                 Console.WriteLine($"Erreur inattendue lors de la suppression du solde de congés : {ex.Message}");
-                throw; // Vous pouvez choisir de relancer l'exception ici ou renvoyer false pour signaler un échec
+                throw; // Capturer toutes les autres exceptions inattendues
             }
         }
 
+        #endregion
+
+        #region Ajoute un solde de congés pour une nouvelle année
+        public async Task AddAsync(VacationsBalance balance, CancellationToken cancellationToken)
+        {
+            try
+            {
+                _databaseContext.VacationsBalances.Add(balance);
+                await _databaseContext.SaveChangesAsync(cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Erreur lors de l'ajout du solde de congés : {ex.Message}");
+                throw;
+            }
+        }
         #endregion
 
     }

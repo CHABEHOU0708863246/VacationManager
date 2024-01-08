@@ -27,6 +27,7 @@ namespace VacationManager.Domain.Models
         public DateTime DateOfBirth { get; set; }
         public DateTime DateCreateAccount { get; set; }
         public DateTime DateUpdateAccount { get; set; }
+        /*public string ResetPasswordToken { get; set; }*/
 
         // Relations avec d'autres tables
         public int RoleID { get; set; }

@@ -156,8 +156,30 @@ namespace VacationManager.Domain.Services
                 EndDate = endDate,
             };
 
-            // Met à jour le solde de congés dans le repository des soldes de congés après la mise à jour
+            // Met à jour le solde de congés dans le repository des soldes de congés avant la mise à jour
             bool updateResult = await _vacationsBalanceRepository.UpdateAsync(userId, startDate, endDate, cancellationToken);
+
+            // Si la mise à jour est réussie, vérifie si l'année actuelle est différente de l'année de la demande de congé
+            if (updateResult && startDate.Year != endDate.Year)
+            {
+                // Récupère le solde de congés de l'année suivante
+                var nextYearBalance = await _vacationsBalanceRepository.GetByUserIdAsync(userId, cancellationToken);
+
+                // Si le solde de congés de l'année suivante n'existe pas, crée-le
+                if (nextYearBalance == null)
+                {
+                    nextYearBalance = new VacationsBalance
+                    {
+                        UserId = userId,
+                        Year = endDate.Year,
+                        InitialVacationBalance = _initialBalance
+                    };
+                    _vacationsBalanceRepository.AddAsync(nextYearBalance, cancellationToken);
+                }
+
+                // Augmente le solde de congés de l'année suivante
+                nextYearBalance.InitialVacationBalance += _initialBalance;
+            }
 
             // Renvoie le résultat de la mise à jour
             return updateResult;
@@ -232,6 +254,31 @@ namespace VacationManager.Domain.Services
 
                 // Met à jour le statut de la demande de congé en utilisant le repository
                 bool updateStatusResult = await _vacationsBalanceRepository.UpdateVacationStatusAsync(vacationId, status, cancellationToken);
+
+                if (updateStatusResult)
+                {
+                    var vacation = await _vacationsRepository.GetByIdAsync(vacationId, cancellationToken);
+
+                    if (vacation != null && vacation.Status == VacationsStatus.Approuve)
+                    {
+                        var usedDays = (vacation.EndDate - vacation.StartDate).Days + 1;
+                        var unusedDays = _initialBalance - usedDays;
+
+                        var nextYear = vacation.StartDate.Year + 1;
+
+                        var balanceForNextYear = await _vacationsBalanceRepository.GetByUserIdAsync(vacation.UserId, cancellationToken);
+                        if (balanceForNextYear == null)
+                        {
+                            balanceForNextYear = new VacationsBalance
+                            {
+                                UserId = vacation.UserId,
+                                InitialVacationBalance = unusedDays, // Ajout du solde non utilisé à l'année suivante
+                                Year = nextYear
+                            };
+                            await _vacationsBalanceRepository.AddAsync(balanceForNextYear, cancellationToken);
+                        }
+                    }
+                }
 
                 if (updateStatusResult)
                 {
@@ -310,6 +357,37 @@ namespace VacationManager.Domain.Services
             }
         }
         #endregion
+
+        #region Ajoute un solde de congés pour une nouvelle année
+        public async Task<bool> AddVacationBalanceAsync(VacationsBalance balance, CancellationToken cancellationToken)
+        {
+            try
+            {
+                if (balance == null)
+                {
+                    throw new ArgumentNullException(nameof(balance), "Solde de congés invalide");
+                }
+
+                // Vérifier si le solde de congés pour l'utilisateur spécifié existe déjà
+                var existingBalance = await _vacationsBalanceRepository.GetByUserIdAsync(balance.UserId, cancellationToken);
+                if (existingBalance != null)
+                {
+                    throw new InvalidOperationException("Le solde de congés pour cet utilisateur existe déjà");
+                }
+
+                // Ajouter le solde de congés pour l'utilisateur spécifié
+                await _vacationsBalanceRepository.AddAsync(balance, cancellationToken);
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Erreur lors de l'ajout du solde de congés : {ex.Message}");
+                return false;
+            }
+        }
+        #endregion
+
 
 
     }

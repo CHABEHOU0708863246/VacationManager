@@ -22,5 +22,8 @@ namespace VacationManager.Domain.Interfaces.InterfaceService
 
         // Supprime un solde de congés en fonction de l'id de lutilisateur
         Task<bool> DeleteVacationBalanceByUsersIdAsync(int userId, CancellationToken cancellationToken);
+
+        // Ajoute un solde de congés pour une nouvelle année
+        Task<bool> AddVacationBalanceAsync(VacationsBalance balance, CancellationToken cancellationToken);
     }
 }
